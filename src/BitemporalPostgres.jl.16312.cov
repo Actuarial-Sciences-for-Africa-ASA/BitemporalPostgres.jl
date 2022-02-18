@@ -1,0 +1,501 @@
+        - module BitemporalPostgres
+        - import SearchLight: AbstractModel, DbId, query, save!
+        - import SearchLightPostgreSQL
+        - import Base: @kwdef
+        - import Intervals, Dates, TimeZones
+        - using Intervals,
+        -     Dates, SearchLight, SearchLight.Transactions, SearchLightPostgreSQL, TimeZones
+        - export History,
+        -     Version,
+        -     Component,
+        -     get_typeof_revision,
+        -     SubComponent,
+        -     ComponentRevision,
+        -     ValidityInterval,
+        -     TestDummyComponent,
+        -     TestDummyComponentRevision,
+        -     TestDummySubComponent,
+        -     TestDummySubComponentRevision,
+        -     Testtstzrange,
+        -     Workflow,
+        -     findversion,
+        -     findcomponentrevision,
+        -     create_entity!,
+        -     create_component!,
+        -     create_subcomponent!,
+        -     update_entity!,
+        -     update_component!,
+        -     delete_component!,
+        -     commit_workflow!,
+        -     maxVersion,
+        -     maxDate,
+        -     infinityKey
+        - 
+        - """
+        -   Workflow
+        -   Holds application based transaction data.
+        -   * current version
+        -   * world validFrom date
+        -   * db validfrom date
+        - 
+        - """
+        - @kwdef mutable struct Workflow <: AbstractModel
+       15     id::DbId = DbId()
+        -     ref_history::DbId = 0
+        -     ref_version::DbId = 0
+        -     tsdb_validfrom::ZonedDateTime = maxDate
+        -     tsw_validfrom::ZonedDateTime = maxDate
+        -     is_committed::Integer = 0
+        - end
+        - 
+        - @kwdef mutable struct Testtstzrange <: AbstractModel
+        -     id::DbId = DbId()
+        -     i::Interval{ZonedDateTime,Closed,Open} = Interval{ZonedDateTime,Closed,Open}(
+        -         ZonedDateTime(2013, 2, 13, 0, 30,0,1, tz"America/Winnipeg"),
+        -         ZonedDateTime(2030, 2, 13, 0, 30,0,1, tz"America/Winnipeg")
+        -     )
+        - end
+        - 
+        - """
+        -   History
+        - 
+        -   The root of an aggregate entity, which groups versions and entities
+        - 
+        - """
+        - @kwdef mutable struct History <: AbstractModel
+        3     id::DbId = DbId()
+        -     dummy::Integer = 0
+        - end
+        - # One ms less than the maximum date, as 
+        - maxDate = ZonedDateTime(DateTime(2038, 1, 19, 3, 14, 6, 999), tz"UTC")
+        - maxDateSQL = SQLInput(maxDate)
+        - infinityKey = 9223372036854775807::Integer
+        - """
+        -   Version
+        - 
+        -   version number of the state of aggregate entity 
+        - 
+        - """
+        - @kwdef mutable struct Version <: AbstractModel
+        9     id::DbId = DbId()
+        -     ref_history::DbId = infinityKey
+        - end
+        - 
+        - """
+        - ValidityInterval
+        - 
+        -   a 2-dimensional interval of validity of a version
+        -   with respect to the state
+        -   
+        -   * of the data base storage and 
+        -   * of the world 
+        - 
+        - """
+        - @kwdef mutable struct ValidityInterval <: AbstractModel
+       49     id::DbId = DbId()
+        -     ref_history::DbId = infinityKey
+        -     ref_version::DbId = infinityKey
+        -     tsrworld::Interval{ZonedDateTime,Closed,Open}=Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"),maxDate)
+        -     tsrdb::Interval{ZonedDateTime,Closed,Open}=Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"),maxDate)
+        -     is_committed::Integer = 0
+        - end
+        - 
+        - """
+        - Component
+        - 
+        -   an abstract component of a bitemporal entity
+        -   i.e. a contract, a reference to a partner
+        -   a component's history of states is represented by its revisions 
+        - 
+        - """
+        - abstract type Component <: AbstractModel end
+        - 
+        2 function getid(component::Component)::DbId
+        2     component.id
+        - end
+        - 
+        - function getref_history(component::Component)::DbId
+        -     component.ref_history
+        - end
+        - 
+        2 function setref_history(component::Component, ref::DbId)
+        2     component.ref_history = ref
+        - end
+        - 
+        - """
+        - SubComponent
+        - 
+        -   an abstract subcomponent of a bitemporal entity
+        -   i.e. product item of a contract
+        - 
+        - """
+        - abstract type SubComponent <: Component end
+        - 
+        - function getref_super(component::Component)::DbId
+        -     component.ref_super
+        - end
+        - 
+        1 function setref_super(subcomponent::SubComponent, ref::DbId)
+        1     subcomponent.ref_super = ref
+        - end
+        - 
+        - """
+        - ComponentRevision
+        - 
+        -   a component of a bitemporal entity
+        -   i.e. a contract, a reference to a partner
+        -   a component's history of states is represented by its revisions 
+        - 
+        - """
+        - abstract type ComponentRevision <: AbstractModel end
+        - 
+        - """
+        - get_typeof_revision(component::T) :: R where {T<: Component, R <: ComponentRevision} 
+        -     returns the actual subtype of ComponentRevision that fits the actual type of component 
+        - """
+        - function get_typeof_revision(component::T) :: Type{R} where {T<: Component, R <: ComponentRevision} 
+        -     Type{R}
+        - end
+        - 
+        - function getid(rev::ComponentRevision)::DbId
+        -     rev.id
+        - end
+        - 
+        - function getref_component(rev::ComponentRevision)::DbId
+        -     rev.ref_component
+        - end
+        - 
+        2 function setref_component(rev::ComponentRevision, ref::DbId)
+        2     rev.ref_component = ref
+        - end
+        - 
+        - function getref_validfrom(ref::DbId)::ComponentRevision
+        -     rev.ref_validfrom = ref
+        - end
+        - 
+        4 function setref_validfrom(rev::ComponentRevision, ref::DbId)
+        4     rev.ref_validfrom = ref
+        - end
+        - 
+        - function getref_invalidfrom(ref::DbId)::ComponentRevision
+        -     rev.ref_invalidfrom = ref
+        - end
+        - 
+        2 function setref_invalidfrom(rev::ComponentRevision, ref::DbId)
+        2     rev.ref_invalidfrom = ref
+        - end
+        - 
+        - """
+        - TestDummyComponent <: Component
+        - 
+        -   a component of a bitemporal entity
+        - 
+        - """
+        - @kwdef mutable struct TestDummyComponent <: Component
+        3     id::DbId = DbId()
+        -     ref_history::DbId = infinityKey
+        - end
+        - 
+        - """
+        - get_typeof_revision(component::TestDummyComponent) :: T where {T<:ComponentRevision}
+        - """
+        - function get_typeof_revision(component::TestDummyComponent) :: T where {T<:ComponentRevision}
+        -     TestDummyComponentRevision
+        - end
+        - 
+        - """
+        - TestDummyComponentRevision <: ComponentRevision
+        - 
+        -   a revision of a contract component of a bitemporal entity
+        - 
+        - """
+        - @kwdef mutable struct TestDummyComponentRevision <: ComponentRevision
+       23     id::DbId = DbId()
+        -     ref_component::DbId = infinityKey
+        -     ref_validfrom::DbId = infinityKey
+        -     ref_invalidfrom::DbId = infinityKey
+        -     description::String = ""
+        - end
+        - 
+        2 Base.copy(src::TestDummyComponentRevision) = TestDummyComponentRevision(
+        -     ref_component = src.ref_component,
+        -     description = src.description,
+        - )
+        - 
+        - """
+        - TestDummySubComponent <: Component
+        -   a component of a bitemporal entity
+        - 
+        - """
+        - @kwdef mutable struct TestDummySubComponent <: SubComponent
+        3     id::DbId = DbId()
+        -     ref_history::DbId = infinityKey
+        -     ref_super::DbId = infinityKey
+        - end
+        - 
+        - """
+        - get_typeof_revision(component::TestDummySubComponent) :: T where {T<:ComponentRevision}
+        - """
+        - function get_typeof_revision(component::TestDummySubComponent) :: Type{TestDummySubComponentRevision}
+        -     TestDummySubComponentRevision
+        - end
+        - 
+        - """
+        - TestDummySubComponentRevision <: ComponentRevision
+        - 
+        -   a revision of a contract component of a bitemporal entity
+        - 
+        - """
+        - @kwdef mutable struct TestDummySubComponentRevision <: ComponentRevision
+        3     id::DbId = DbId()
+        -     ref_component::DbId = infinityKey
+        -     ref_validfrom::DbId = infinityKey
+        -     ref_invalidfrom::DbId = infinityKey
+        -     description::String = ""
+        - end
+        - 
+        - Base.copy(src::TestDummySubComponentRevision) = TestDummySubComponentRevision(
+        -     ref_component = src.ref_component,
+        -     description = src.description,
+        - )
+        - """
+        - findversion(ref_history::DbId, tsdb::ZonedDateTime, tsw::ZonedDateTime)::DbId
+        -        retrieves the version_id of a bitemporal history asof tsdb as per tsw
+        - """
+        5 function findversion(ref_history::DbId, tsdb::ZonedDateTime, tsw::ZonedDateTime)::DbId
+        5     find(
+        -         ValidityInterval,
+        -         SQLWhereExpression(
+        -             "ref_history=? and tsrworld @> TIMESTAMPTZ ? AND tsrdb @> TIMESTAMPTZ ?",
+        -             ref_history,
+        -             SQLInput(tsw),
+        -             SQLInput(tsdb),
+        -         ),
+        -     )[1].ref_version
+        - end
+        - 
+        - """
+        - findcomponentrevision(t::Type{T},ref_component::DbId,ref_version::DbId,)::Vector{T} where {T<:ComponentRevision}
+        -     retrieves the version_id of a bitemporal history asof tsdb as per tsw
+        - """
+        5 function findcomponentrevision(t::Type{T},ref_component::DbId,ref_version::DbId,)::Vector{T} where {T<:ComponentRevision}
+        5     find(
+        -         t,
+        -         SQLWhereExpression(
+        -             "ref_component = ? AND ref_valid @> BIGINT ? ",
+        -             ref_component,
+        -             ref_version,
+        -         ),
+        -     )
+        - end
+        - 
+        - """
+        - create_entity!(w::Workflow)
+        - 
+        - persists a history, version, validityInterval and a Workflow 
+        - requires: w.tsw_validfrom is a valid date
+        - 
+        - """
+        1 function create_entity!(w::Workflow)
+        1     transaction() do
+        1         h = History()
+        1         save!(h)
+        1         v = Version(ref_history = h.id)
+        - 
+        1         save!(v)
+        - 
+        1         w.ref_history = h.id
+        1         w.ref_version = v.id
+        1         save!(w)
+        - 
+        1         i = ValidityInterval(
+        -             ref_history = h.id,
+        -             ref_version = v.id,
+        -             tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom,maxDate),
+        -             tsrdb = Interval{ZonedDateTime,Closed,Open}(now(tz"Africa/Porto-Novo"),maxDate)
+        -         )
+        1         save!(i)
+        -     end
+        - end
+        - 
+        - """
+        - create_component!(c::Component, cr :: ComponentRevision, w:: Workflow) 
+        - 
+        - creates a component and a componentRevision
+        - 
+        - """
+        1 function create_component!(c::Component, cr::ComponentRevision, w::Workflow)
+        1     transaction() do
+        1         hid = w.ref_history
+        1         vid = w.ref_version
+        1         setref_history(c, hid)
+        1         save!(c)
+        - 
+        1         setref_component(cr, getid(c))
+        1         setref_validfrom(cr, vid)
+        1         save!(cr)
+        -     end
+        - end
+        - 
+        - """
+        - create_subcomponent!(c::Component, sc::SubComponent, cr :: ComponentRevision, w:: Workflow) 
+        - creates a subcomponent and a componentRevision
+        - """
+        1 function create_subcomponent!(
+        -     c::Component,
+        -     sc::SubComponent,
+        -     cr::ComponentRevision,
+        -     w::Workflow,
+        - )
+        1     transaction() do
+        1         hid = w.ref_history
+        1         vid = w.ref_version
+        1         setref_super(sc, c.id)
+        1         setref_history(sc, hid)
+        1         save!(sc)
+        - 
+        1         setref_component(cr, getid(sc))
+        1         setref_validfrom(cr, vid)
+        1         save!(cr)
+        -     end
+        - end
+        - 
+        - """
+        - update_entity!(w::Workflow)
+        - 
+        - persists a version, a validityInterval and a Workflow 
+        - requires: w.tsw_validfrom is a valid date
+        -           w.ref_history is a valid history id
+        -           w.ref_version is a valid version of w.ref_history
+        - 
+        - """
+        2 function update_entity!(w::Workflow)
+        2     transaction() do
+        2         hid = w.ref_history
+        2         v = Version(ref_history = hid)
+        2         save!(v)
+        2         w.ref_version = v.id
+        2         save!(w)
+        - 
+        2         i = ValidityInterval(
+        -             ref_history = hid,
+        -             ref_version = v.id,
+        -             tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom,maxDate),
+        -             tsrdb = Interval{ZonedDateTime,Closed,Open}(now(tz"Africa/Porto-Novo"),maxDate)
+        -         )
+        2         save!(i)
+        -     end
+        - end
+        - 
+        - 
+        - """
+        - update_component!(cr :: ComponentRevision, crNew :: ComponentRevision, w:: Workflow) 
+        - 
+        - terminates a componentRevision and persists its successor
+        - 
+        - """
+        2 function update_component!(cr::ComponentRevision, crNew::ComponentRevision, w::Workflow)
+        2     transaction() do
+        2         vid = w.ref_version
+        2         setref_invalidfrom(cr, vid)
+        2         save!(cr)
+        - 
+        2         setref_validfrom(crNew, vid)
+        2         save!(crNew)
+        -     end
+        - end
+        - 
+        - """
+        - delete_component!(c::T, w::Workflow)  where {T<:Component}
+        - 
+        -  * deletes a component if it was created for the current version or
+        -  * mark its latest component revision as invalid
+        - 
+        - """
+        - function delete_component!(c::T, w::Workflow)  where {T<:Component}
+        -     transaction() do
+        -         vid = w.ref_version
+        -         revs=find(get_typeof_revision(c),SQLWhereExpression("ref_component=?",c.id))
+        -         if length(revs)==1 && revs[1].ref_validfrom == vid
+        -             """
+        -             c was created for current version, foreign key constraint cascades  deletion to revision 
+        -             """
+        -             delete(c)
+        -         else
+        -             for r in revs 
+        -                 if vid.value >= r.ref_validfrom.value && vid.value < r.ref_invalidfrom.value
+        -                     """
+        -                     the current revision gets terminated 
+        -                     """
+        -                     r.ref_invalidfrom = vid
+        -                     save!(r)
+        -                 end
+        -             end
+        -         end
+        -     end
+        - end
+        - 
+        - """
+        - commit_workflow!(w::Workflow)
+        -   commits the application based transaction 
+        -   begun with the creation of w
+        -   * sets w's version's validityInterval to is_committed
+        -   * ends all overlapping intervals to tsdb_invalidfrom w.tsdb_validfrom
+        -   * creates a new interval for the non_overlapping part of a partially interval if any
+        - """
+        3 function commit_workflow!(w::Workflow)
+        3     transaction() do
+        3         w.tsdb_validfrom = now(tz"Africa/Porto-Novo")
+        - 
+        3         uncommitted = find(
+        -             ValidityInterval,
+        -             SQLWhereExpression("ref_version = ?  AND is_committed = 0", w.ref_version),
+        -         )
+        - 
+        3         shadowed = find(
+        -             ValidityInterval,
+        -             SQLWhereExpression(
+        -                 "ref_history = ?  AND tsrdb @> TIMESTAMPTZ ? AND tsrworld <@ tstzrange(?,?) AND is_committed=1",
+        -                 w.ref_history,
+        -                 maxDate - Dates.Day(1),
+        -                 uncommitted[1].tsrworld.first + Dates.Day(1),
+        -                 uncommitted[1].tsrworld.last,
+        -             ),
+        -         )
+        - 
+        3         for i in shadowed
+        1             i.tsrdb = Interval{ZonedDateTime,Closed,Open}(i.tsrdb.first,w.tsdb_validfrom)
+        1             save!(i)
+        -         end
+        - 
+        3         overlapped = find(
+        -             ValidityInterval,
+        -             SQLWhereExpression(
+        -                 "ref_history = ?  AND tsrdb @> TIMESTAMPTZ ? AND tsrworld && tstzrange(?,?) AND is_committed=1",
+        -                 w.ref_history,
+        -                 maxDate - Dates.Day(1),
+        -                 uncommitted[1].tsrworld.first + Dates.Day(1),
+        -                 uncommitted[1].tsrworld.last,
+        -             ),
+        -         )
+        3         for i in overlapped
+        2             i.tsrdb = Interval{ZonedDateTime,Closed,Open}(i.tsrdb.first,w.tsdb_validfrom)
+        2             j = ValidityInterval(
+        -                 ref_history = i.ref_history,
+        -                 ref_version = i.ref_version,
+        -                 tsrdb = Interval{ZonedDateTime,Closed,Open}(w.tsdb_validfrom,maxDate),
+        -                 tsrworld = Interval{ZonedDateTime,Closed,Open}(i.tsrworld.first,uncommitted[1].tsrworld.first),
+        -                 is_committed = 1
+        -             )
+        2             save!(i)
+        2             save!(j)
+        -         end
+        3         for i in uncommitted
+        3             i.is_committed = 1
+        3             save!(i)
+        -         end
+        3         w.is_committed = 1
+        3         save!(w)
+        -     end
+        - end
+        - end # module

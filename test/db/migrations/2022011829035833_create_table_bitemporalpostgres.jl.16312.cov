@@ -1,0 +1,195 @@
+        - module BitemporalPostgresDDL
+        - import SearchLight: query
+        - import SearchLight.Migrations: create_table, column, columns, primary_key, add_index, drop_table, add_indices
+        - import TimeZones
+        - using SearchLight, TimeZones
+        - export  create_versions_trigger, create_validity_intervals_constraints, up, down
+        - 
+        - """
+        - create_versions_trigger()
+        -   propagate skalars ref_validfrom and ref_invalidfrom to range ref_valid
+        -   skalars are needed enable foreign key constraints, which in POSTGRES cannot be declared
+        -   onto bounds of intervals directly.
+        - """
+        1 function create_versions_trigger() 
+        1   q = """
+        -   CREATE OR REPLACE FUNCTION f_versionrange ()
+        -   RETURNS trigger AS
+        -   \$\$
+        -        DECLARE
+        -   
+        -        BEGIN
+        -             RAISE NOTICE 'NEW: %', NEW;
+        -             NEW.ref_valid := int8range(NEW.ref_validfrom,NEW.ref_invalidfrom,'[)');
+        -             RETURN NEW;
+        -        END;
+        -   \$\$ LANGUAGE 'plpgsql';
+        -   """
+        1   SearchLight.query(q)
+        - end
+        - 
+        - """
+        - create_validity_intervals_constraints()
+        -   Install the GIST constraint that prevents creation of overlapping intervals, i.e.
+        -   that at most one version is valid for a given 2 dimensional point in transaction and reference time
+        - """
+        1 function create_validity_intervals_constraints() 
+        1   q="""
+        -   ALTER TABLE validityIntervals 
+        -   ADD CONSTRAINT bitemp EXCLUDE USING GIST (ref_version WITH =, is_committed WITH =, tsrworld WITH &&, tsrdb WITH &&)
+        -   """
+        1   SearchLight.query(q)
+        - end
+        - 
+        - """
+        - up()
+        - callback from SearchLight.Migrations.up 
+        - creating the Database Schema for bitemporal Transactions
+        - including test dummy tables
+        - """
+        1 function up()
+        1   createGistExtension = "CREATE EXTENSION IF NOT EXISTS btree_gist;"
+        -   
+        1   create_table(:histories) do
+        1     [
+        -       column(:id,:bigserial,"PRIMARY KEY")
+        -       column(:dummy, :integer)
+        -     ]
+        -   end
+        - 
+        1   create_table(:versions) do
+        1     [
+        -       column(:id,:bigserial,"PRIMARY KEY")
+        -       column(:ref_history, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
+        -     ]
+        -   end
+        - 
+        -   
+        1   create_table(:workflows) do
+        1     [
+        -       column(:id,:bigserial,"PRIMARY KEY")
+        -       column(:ref_history, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
+        -       column(:ref_version, :integer,"REFERENCES versions(id) ON DELETE CASCADE")
+        -       column(:tsw_validfrom, :timestamptz,"(3)")
+        -       column(:tsdb_validfrom, :timestamptz,"(3)")
+        -       column(:is_committed, :integer)
+        -     ]
+        -   end
+        - 
+        1   create_table(:testtstzranges) do
+        1     [
+        -       column(:id,:bigserial,"PRIMARY KEY")
+        -       column(:i, :tstzrange)
+        -     ]
+        -   end
+        -   
+        1   create_table(:validityIntervals) do
+        1       [
+        -         column(:id,:bigserial,"PRIMARY KEY")
+        -         column(:ref_history, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
+        -         column(:ref_version, :integer,"REFERENCES versions(id) ON DELETE CASCADE")
+        -         column(:tsrworld, :tstzrange)
+        -         column(:tsrdb, :tstzrange) 
+        -         column(:is_committed, :integer)
+        -       ]
+        -   end
+        - 
+        1   create_table(:testdummyComponents) do
+        1     [
+        -       column(:id,:bigserial,"PRIMARY KEY")
+        -       column(:ref_history, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
+        -     ]
+        -     end
+        -   
+        1     create_table(:testdummyComponentRevisions) do
+        1       [
+        -         column(:id,:bigserial,"PRIMARY KEY")
+        -         column(:ref_component, :integer, "REFERENCES testdummyComponents(id) ON DELETE CASCADE")
+        -         column(:ref_validfrom, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
+        -         column(:ref_invalidfrom, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
+        -         column(:ref_valid, :int8range)
+        -         column(:description, :string)
+        -       ]
+        -     end
+        -       
+        1   create_table(:testdummySubComponents) do
+        1     [
+        -       column(:id,:bigserial,"PRIMARY KEY")
+        -       column(:ref_history, :integer,"REFERENCES testdummyComponents(id) ON DELETE CASCADE") 
+        -       column(:ref_super, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
+        -     ]
+        -     end
+        -   
+        1     create_table(:testdummySubComponentRevisions) do
+        1       [
+        -         column(:id,:bigserial,"PRIMARY KEY")
+        -         column(:ref_component, :integer, "REFERENCES testdummySubComponents(id) ON DELETE CASCADE")
+        -         column(:ref_validfrom, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
+        -         column(:ref_invalidfrom, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
+        -         column(:ref_valid, :int8range)
+        -         column(:description, :string)
+        -       ]
+        -     end
+        - 
+        1     createTestdummyComponentRevisionsTrigger = """
+        -     CREATE TRIGGER tr_versions_trig
+        -     BEFORE INSERT OR UPDATE ON testdummyComponentRevisions
+        -     FOR EACH ROW EXECUTE PROCEDURE f_versionrange();
+        -     """
+        -   
+        1     createTestdummyComponentRevisionsConstraints = """
+        -     ALTER TABLE testdummycomponentrevisions 
+        -     ADD CONSTRAINT testdummycomponentrevisionsversionrange EXCLUDE USING GIST (ref_component WITH =, ref_valid WITH &&)
+        -     """
+        -     
+        1     createTestdummySubComponentRevisionsTrigger = """
+        -     CREATE TRIGGER tr_versions_trig
+        -     BEFORE INSERT OR UPDATE ON testdummySubComponentRevisions
+        -     FOR EACH ROW EXECUTE PROCEDURE f_versionrange();
+        -     """
+        -   
+        1     createTestdummySubComponentRevisionsConstraints = """
+        -     ALTER TABLE testdummySubComponentrevisions 
+        -     ADD CONSTRAINT testdummysubcomponentrevisionsversionrange EXCLUDE USING GIST (ref_component WITH =, ref_valid WITH &&)
+        -     """
+        - 
+        - 
+        1 SearchLight.query(createGistExtension)
+        1 create_validity_intervals_constraints()
+        1 create_versions_trigger()
+        1 SearchLight.query(createTestdummyComponentRevisionsTrigger)
+        1 SearchLight.query(createTestdummyComponentRevisionsConstraints)
+        1 SearchLight.query(createTestdummySubComponentRevisionsTrigger)
+        1 SearchLight.query(createTestdummySubComponentRevisionsConstraints)
+        1 maxDate =  ZonedDateTime(DateTime(2038, 1, 19,14,7), tz"UTC")
+        1 maxDateSQL = SQLInput(maxDate)
+        1 infinityKey = 9223372036854775807 ::Integer
+        - 
+        1 SearchLight.query("""
+        - INSERT INTO histories VALUES($infinityKey,0)
+        - """
+        - )
+        1 SearchLight.query("""
+        - INSERT INTO versions VALUES($infinityKey)
+        - """
+        - )
+        -   
+        - end
+        - 
+        - """
+        - down()
+        - callback from SearchLight.Migrations.down 
+        - tearing down the Database Schema for bitemproal Transactions
+        - including test dummy tables
+        - """
+        - function down()
+        -   drop_table(:testdummySubComponentRevisions)
+        -   drop_table(:testdummySubComponents)
+        -   drop_table(:testdummyComponentRevisions)
+        -   drop_table(:testdummyComponents)
+        -   drop_table(:validityIntervals)
+        -   drop_table(:workflows)
+        -   drop_table(:versions)
+        -   drop_table(:histories)
+        - end
+        - end
