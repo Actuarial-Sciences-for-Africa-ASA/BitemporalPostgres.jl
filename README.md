@@ -1,5 +1,7 @@
 ![beware - work in progress](docs/src/assets/wip.png)
 
+[![CI](https://github.com/Kaeptenblaubaer/BitemporalPostgres.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/Kaeptenblaubaer/BitemporalPostgres.jl/actions/workflows/CI.yml)
+
 # BitemporalPostgres provides an API for application based bitemporal transactions with Julia and Postgres DB.
 ## These are "long" transactions, with persistent transaction data that is, so they can serve as a basis of workflow management: they can be suspended, resumed and delegated.
 
