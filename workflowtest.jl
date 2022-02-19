@@ -98,4 +98,4 @@ v3a = findversion(w3.ref_history, w3.tsdb_validfrom, w3.tsw_validfrom - Dates.Se
 @test findcomponentrevision(TestDummyComponentRevision, t.id, v3a)[1].description == "blue"
 @test findcomponentrevision(TestDummySubComponentRevision, ts.id, v3a)[1].description == "green"
 
-end
+end 
