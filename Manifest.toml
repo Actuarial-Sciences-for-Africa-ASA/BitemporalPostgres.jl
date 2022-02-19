@@ -205,10 +205,10 @@ deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 
 [[deps.LibPQ]]
-deps = ["CEnum", "Dates", "Decimals", "DocStringExtensions", "FileWatching", "Infinity", "Intervals", "IterTools", "LayerDicts", "LibPQ_jll", "Libdl", "Memento", "OffsetArrays", "Tables", "TimeZones"]
-git-tree-sha1 = "143cce21465fed3173d3bdc2541d2705d5692a21"
+deps = ["CEnum", "Dates", "Decimals", "DocStringExtensions", "FileWatching", "Infinity", "Intervals", "IterTools", "LayerDicts", "LibPQ_jll", "Libdl", "Memento", "OffsetArrays", "SQLStrings", "Tables", "TimeZones"]
+git-tree-sha1 = "82bf56d7cbfcc77deb5c530adaaa1fab64b2de6d"
 uuid = "194296ae-ab2e-5f79-8cd4-7183a0a5a0d1"
-version = "1.11.0"
+version = "1.12.0"
 
 [[deps.LibPQ_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "OpenSSL_jll", "Pkg"]
@@ -355,6 +355,11 @@ version = "1.3.0"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+
+[[deps.SQLStrings]]
+git-tree-sha1 = "55de0530689832b1d3d43491ee6b67bd54d3323c"
+uuid = "af517c2e-c243-48fa-aab8-efac3db270f5"
+version = "0.1.0"
 
 [[deps.SearchLight]]
 deps = ["DataFrames", "Dates", "Distributed", "Inflector", "Intervals", "JSON3", "Logging", "Millboard", "OrderedCollections", "Reexport", "SHA", "Unicode", "YAML"]

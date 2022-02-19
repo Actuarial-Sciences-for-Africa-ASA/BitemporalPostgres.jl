@@ -5,6 +5,8 @@ import Base: @kwdef
 import Intervals, Dates, TimeZones
 using Intervals,
     Dates, SearchLight, SearchLight.Transactions, SearchLightPostgreSQL, TimeZones
+include("DDL.jl")
+using .DDL
 export History,
     Version,
     Component,
@@ -29,7 +31,9 @@ export History,
     commit_workflow!,
     maxVersion,
     maxDate,
-    infinityKey
+    infinityKey,
+    up,
+    down
 
 """
   Workflow

@@ -1,6 +1,6 @@
 push!(LOAD_PATH,"../src/") 
 using Documenter
-using BitemporalPostgres
+using BitemporalPostgres, BitemporalPostgres.DDL
 
 makedocs(
     sitename = "BitemporalPostgres",
@@ -9,6 +9,7 @@ makedocs(
         "Home" => "index.md",
         "BitemporalPostgres API" => [
             "BitemporalPostgres" => "api/BitemporalPostgres.md",
+            "DDL" => "api/BitemporalPostgres.DDL.md",
             "Theory" => "api/theory.md"
         ]
     ]
