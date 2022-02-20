@@ -93,6 +93,7 @@ ValidityInterval
   
   * of the data base storage and 
   * of the world 
+  [Theory here:](api/Theory.md)
 
 """
 @kwdef mutable struct ValidityInterval <: AbstractModel
