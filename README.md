@@ -10,7 +10,7 @@
 ## These are "long" transactions, with persistent transaction data that is, so they can serve as a basis of workflow management: they can be suspended, resumed and delegated.
 
 Documentation
-[here](https://github.com/michaelfliegner.github.io/BitemporalPostgres.jl/dev)
+[here](https://michaelfliegner.github.io/BitemporalPostgres.jl/dev/)
 
 A web app using this module for persistence will be built at https://github.com/michaelfliegner/BitempWebApp.jl
 
