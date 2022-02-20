@@ -12,7 +12,7 @@
 Documentation
 [here](https://github.com/michaelfliegner.github.io/BitemporalPostgres.jl/dev)
 
-A web app using this module for persistence will be built at https://github.com/michaelfliegner/BitempWebapp,jl
+A web app using this module for persistence will be built at https://github.com/michaelfliegner/BitempWebApp.jl
 
 
 ## This project is a [Julia](https://julialang.org/) template configured for ephemeral development environments on [Gitpod](https://www.gitpod.io/). 
