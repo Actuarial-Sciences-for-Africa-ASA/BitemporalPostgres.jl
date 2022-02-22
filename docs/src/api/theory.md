@@ -132,18 +132,49 @@ c_{3} =& [v_{blue}, v_{∞})
 \end{aligned}
 ```
 
-## long transactions
+## Bitemporal Transactions
 
-A transaction is identified by a version and all transaction data depends on it.
+### Transaction data, commits and rollbacks
 
-* Beginning a transaction on a bitemporal aggregate means creating a version object and
-  an interval of validity labelled as not commited.
-* New revisions of components are marked as valid from the new version on. Revisions of mutated or deleted components are marked as invalid from the new version.
-* Backing out of a transaction means deleting the version object and its depending data:
-  * deleting the new revisions marked as valid from the rollbacked version on
-  * retracting the marks of being invalid from the rollbacked version on
-* Committing a version means labelling its interval of validity as committed and managing shadowing and overlapping of its interval
-  of validity whith those of previous versions as is described in the following.
+Transactions here are application based. A transaction is identified by a version and transaction data that depend on it.
+
+**Beginning a transaction** on a bitemporal aggregate now as of a date of reference w means
+
+* to create a version object and
+* an interval of validity labelled as not committed and
+
+```math
+\hspace*{10mm} validity = [now,∞) [w,∞)
+```
+
+**Mutations of components** consist of
+
+* new revisions of components that are marked as valid from the new version on and invalid from infinity on and
+* previous revisions of mutated or deleted components that are marked as invalid from the new version on.
+
+**Backing out** of a bitemporal transaction consists of
+
+* deleting the version instance and its depending data:
+  * the uncommitted interval
+  * new revisions of components, which are marked as valid from the backed out version on and
+  * resetting the "invalid from" marks of mutated revisions back to infinity(maxVersion)
+
+**Committing**  a version consists of
+
+* labelling its interval of validity as committed
+* and managing shadowing and overlapping of its interval
+  of validity with those of previous versions as is described in above examples.
+
+### Locking
+
+Application defined locking is based on a constraint that per entity only one interval with state uncommitted may exist.
+
+### Reified transactions and workflow
+
+As transactions in this framework are first class data they can be utilized for workflow control:
+
+* As results of transactionaal operations are persisted immediately, they existence does not depend on the process they are initiated in. The process can be ended before commit and the workflow can resumed later in another process.
+* With concepts of _ownership of workflow_ and _state of work_ added, transactions with _state of work = suspended_ marked can  be delegated between owners by suspending and resuming in their respective processes.
 
 ## GiST indexing in POSTGRES for search and guarding bitemporal uniqueness
 

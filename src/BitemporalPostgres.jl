@@ -41,6 +41,10 @@ export History,
   * current version
   * world validFrom date
   * db validfrom date
+  * is_committed means: bitemporal transaction is
+      * pending: 0
+      * committed: 1
+      * rolled back: 2
 
 """
 @kwdef mutable struct Workflow <: AbstractModel
@@ -55,8 +59,8 @@ end
 @kwdef mutable struct Testtstzrange <: AbstractModel
     id::DbId = DbId()
     i::Interval{ZonedDateTime,Closed,Open} = Interval{ZonedDateTime,Closed,Open}(
-        ZonedDateTime(2013, 2, 13, 0, 30,0,1, tz"America/Winnipeg"),
-        ZonedDateTime(2030, 2, 13, 0, 30,0,1, tz"America/Winnipeg")
+        ZonedDateTime(2013, 2, 13, 0, 30, 0, 1, tz"America/Winnipeg"),
+        ZonedDateTime(2030, 2, 13, 0, 30, 0, 1, tz"America/Winnipeg"),
     )
 end
 
@@ -74,6 +78,7 @@ end
 maxDate = ZonedDateTime(DateTime(2038, 1, 19, 3, 14, 6, 999), tz"UTC")
 maxDateSQL = SQLInput(maxDate)
 infinityKey = 9223372036854775807::Integer
+maxVersion = DbId(infinityKey)
 """
   Version
 
@@ -100,8 +105,10 @@ ValidityInterval
     id::DbId = DbId()
     ref_history::DbId = infinityKey
     ref_version::DbId = infinityKey
-    tsrworld::Interval{ZonedDateTime,Closed,Open}=Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"),maxDate)
-    tsrdb::Interval{ZonedDateTime,Closed,Open}=Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"),maxDate)
+    tsrworld::Interval{ZonedDateTime,Closed,Open} =
+        Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"), maxDate)
+    tsrdb::Interval{ZonedDateTime,Closed,Open} =
+        Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"), maxDate)
     is_committed::Integer = 0
 end
 
@@ -158,7 +165,9 @@ abstract type ComponentRevision <: AbstractModel end
 get_typeof_revision(component::T) :: R where {T<: Component, R <: ComponentRevision} 
     returns the actual subtype of ComponentRevision that fits the actual type of component 
 """
-function get_typeof_revision(component::T) :: Type{R} where {T<: Component, R <: ComponentRevision} 
+function get_typeof_revision(
+    component::T,
+)::Type{R} where {T<:Component,R<:ComponentRevision}
     Type{R}
 end
 
@@ -204,7 +213,7 @@ end
 """
 get_typeof_revision(component::TestDummyComponent) :: T where {T<:ComponentRevision}
 """
-function get_typeof_revision(component::TestDummyComponent) :: T where {T<:ComponentRevision}
+function get_typeof_revision(component::TestDummyComponent)::T where {T<:ComponentRevision}
     TestDummyComponentRevision
 end
 
@@ -241,7 +250,9 @@ end
 """
 get_typeof_revision(component::TestDummySubComponent) :: T where {T<:ComponentRevision}
 """
-function get_typeof_revision(component::TestDummySubComponent) :: Type{TestDummySubComponentRevision}
+function get_typeof_revision(
+    component::TestDummySubComponent,
+)::Type{TestDummySubComponentRevision}
     TestDummySubComponentRevision
 end
 
@@ -283,7 +294,11 @@ end
 findcomponentrevision(t::Type{T},ref_component::DbId,ref_version::DbId,)::Vector{T} where {T<:ComponentRevision}
     retrieves the version_id of a bitemporal history asof tsdb as per tsw
 """
-function findcomponentrevision(t::Type{T},ref_component::DbId,ref_version::DbId,)::Vector{T} where {T<:ComponentRevision}
+function findcomponentrevision(
+    t::Type{T},
+    ref_component::DbId,
+    ref_version::DbId,
+)::Vector{T} where {T<:ComponentRevision}
     find(
         t,
         SQLWhereExpression(
@@ -296,9 +311,9 @@ end
 
 """
 create_entity!(w::Workflow)
-
-persists a history, version, validityInterval and a Workflow 
-requires: w.tsw_validfrom is a valid date
+* opens a bitemporal transaction identified by ref_version
+* persists a history, version, validityInterval and a Workflow 
+* requires: w.tsw_validfrom is a valid date
 
 """
 function create_entity!(w::Workflow)
@@ -316,8 +331,11 @@ function create_entity!(w::Workflow)
         i = ValidityInterval(
             ref_history = h.id,
             ref_version = v.id,
-            tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom,maxDate),
-            tsrdb = Interval{ZonedDateTime,Closed,Open}(now(tz"Africa/Porto-Novo"),maxDate)
+            tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom, maxDate),
+            tsrdb = Interval{ZonedDateTime,Closed,Open}(
+                now(tz"Africa/Porto-Novo"),
+                maxDate,
+            ),
         )
         save!(i)
     end
@@ -367,11 +385,12 @@ end
 
 """
 update_entity!(w::Workflow)
-
-persists a version, a validityInterval and a Workflow 
-requires: w.tsw_validfrom is a valid date
-          w.ref_history is a valid history id
-          w.ref_version is a valid version of w.ref_history
+* opens a bitemporal transaction identified by ref_version
+* persists a version, a validityInterval and a Workflow 
+* requires:
+    * w.tsw_validfrom is a valid date
+    * w.ref_history is a valid history id
+    * w.ref_version is a valid version of w.ref_history
 
 """
 function update_entity!(w::Workflow)
@@ -385,8 +404,11 @@ function update_entity!(w::Workflow)
         i = ValidityInterval(
             ref_history = hid,
             ref_version = v.id,
-            tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom,maxDate),
-            tsrdb = Interval{ZonedDateTime,Closed,Open}(now(tz"Africa/Porto-Novo"),maxDate)
+            tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom, maxDate),
+            tsrdb = Interval{ZonedDateTime,Closed,Open}(
+                now(tz"Africa/Porto-Novo"),
+                maxDate,
+            ),
         )
         save!(i)
     end
@@ -417,17 +439,17 @@ delete_component!(c::T, w::Workflow)  where {T<:Component}
  * mark its latest component revision as invalid
 
 """
-function delete_component!(c::T, w::Workflow)  where {T<:Component}
+function delete_component!(c::T, w::Workflow) where {T<:Component}
     transaction() do
         vid = w.ref_version
-        revs=find(get_typeof_revision(c),SQLWhereExpression("ref_component=?",c.id))
-        if length(revs)==1 && revs[1].ref_validfrom == vid
+        revs = find(get_typeof_revision(c), SQLWhereExpression("ref_component=?", c.id))
+        if length(revs) == 1 && revs[1].ref_validfrom == vid
             """
             c was created for current version, foreign key constraint cascades  deletion to revision 
             """
             delete(c)
         else
-            for r in revs 
+            for r in revs
                 if vid.value >= r.ref_validfrom.value && vid.value < r.ref_invalidfrom.value
                     """
                     the current revision gets terminated 
@@ -442,7 +464,7 @@ end
 
 """
 commit_workflow!(w::Workflow)
-  commits the application based transaction 
+  commits the bitemporal transaction identified by ref_version
   begun with the creation of w
   * sets w's version's validityInterval to is_committed
   * ends all overlapping intervals to tsdb_invalidfrom w.tsdb_validfrom
@@ -469,7 +491,7 @@ function commit_workflow!(w::Workflow)
         )
 
         for i in shadowed
-            i.tsrdb = Interval{ZonedDateTime,Closed,Open}(i.tsrdb.first,w.tsdb_validfrom)
+            i.tsrdb = Interval{ZonedDateTime,Closed,Open}(i.tsrdb.first, w.tsdb_validfrom)
             save!(i)
         end
 
@@ -484,13 +506,16 @@ function commit_workflow!(w::Workflow)
             ),
         )
         for i in overlapped
-            i.tsrdb = Interval{ZonedDateTime,Closed,Open}(i.tsrdb.first,w.tsdb_validfrom)
+            i.tsrdb = Interval{ZonedDateTime,Closed,Open}(i.tsrdb.first, w.tsdb_validfrom)
             j = ValidityInterval(
                 ref_history = i.ref_history,
                 ref_version = i.ref_version,
-                tsrdb = Interval{ZonedDateTime,Closed,Open}(w.tsdb_validfrom,maxDate),
-                tsrworld = Interval{ZonedDateTime,Closed,Open}(i.tsrworld.first,uncommitted[1].tsrworld.first),
-                is_committed = 1
+                tsrdb = Interval{ZonedDateTime,Closed,Open}(w.tsdb_validfrom, maxDate),
+                tsrworld = Interval{ZonedDateTime,Closed,Open}(
+                    i.tsrworld.first,
+                    uncommitted[1].tsrworld.first,
+                ),
+                is_committed = 1,
             )
             save!(i)
             save!(j)
@@ -503,4 +528,19 @@ function commit_workflow!(w::Workflow)
         save!(w)
     end
 end
+
+"""
+rollback_workflow!(w::Workflow)
+    rolls back the bitemporal transaction identified by ref_version
+    begun with the creation of w
+"""
+function rollback_workflow!(w::Workflow)
+    transaction() do
+        v = find(Version, SQLWhereExpression("id=?", w.ref_version))
+        delete(v)
+        w.is_committed = 2
+        save(w)
+    end
+end
+
 end # module
