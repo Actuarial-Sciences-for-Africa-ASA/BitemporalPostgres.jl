@@ -104,7 +104,7 @@ function up()
     create_table(:testdummyComponentRevisions) do
       [
         column(:id,:bigserial,"PRIMARY KEY")
-        column(:ref_component, :integer, "REFERENCES testdummyComponents(id) ON DELETE CASCADE")
+        column(:ref_component, :integer, "REFERENCES testdummyComponents(id)")
         column(:ref_validfrom, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
         column(:ref_invalidfrom, :integer, "DEFAULT 9223372036854775807 REFERENCES versions(id) ON DELETE SET DEFAULT")
         column(:ref_valid, :int8range)
@@ -123,7 +123,7 @@ function up()
     create_table(:testdummySubComponentRevisions) do
       [
         column(:id,:bigserial,"PRIMARY KEY")
-        column(:ref_component, :integer, "REFERENCES testdummySubComponents(id) ON DELETE CASCADE")
+        column(:ref_component, :integer, "REFERENCES testdummySubComponents(id)")
         column(:ref_validfrom, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
         column(:ref_invalidfrom, :integer, "DEFAULT 9223372036854775807 REFERENCES versions(id) ON DELETE SET DEFAULT")
         column(:ref_valid, :int8range)
