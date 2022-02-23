@@ -1,5 +1,3 @@
-![beware - work in progress](docs/src/assets/wip.png)
-
 [![CI](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/CI.yml)
 
 [![Documentation](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/Documentation.yml/badge.svg)](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/Documentation.yml)
