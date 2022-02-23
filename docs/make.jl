@@ -10,8 +10,7 @@ makedocs(
         "BitemporalPostgres API" => [
             "BitemporalPostgres" => "api/BitemporalPostgres.md",
             "DDL" => "api/BitemporalPostgres.DDL.md",
-            "Theory" => "api/theory.md",
-            "Transactions" => "api/transactions.md"
+            "Theory" => "api/theory.md"
         ]
     ]
 )
