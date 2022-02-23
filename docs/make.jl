@@ -19,5 +19,5 @@ makedocs(
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 # for more information.
 deploydocs(
-    repo = "https://github.com/michaelfliegner/BitemporalPostgres.jl"
+    repo = "github.com/michaelfliegner/BitemporalPostgres.jl"
 )
