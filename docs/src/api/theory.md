@@ -157,7 +157,7 @@ Transactions here are application based. A transaction is identified by a versio
 * deleting the version instance and its depending data:
   * the uncommitted interval
   * new revisions of components, which are marked as valid from the backed out version on and
-  * resetting the "invalid from" marks of mutated revisions back to infinity(maxVersion)
+  * resetting the "invalid from" marks of mutated revisions back to infinity(MaxVersion)
 
 **Committing**  a version consists of
 

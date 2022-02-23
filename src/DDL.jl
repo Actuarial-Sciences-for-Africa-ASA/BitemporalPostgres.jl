@@ -163,16 +163,16 @@ SearchLight.query(createTestdummyComponentRevisionsTrigger)
 SearchLight.query(createTestdummyComponentRevisionsConstraints)
 SearchLight.query(createTestdummySubComponentRevisionsTrigger)
 SearchLight.query(createTestdummySubComponentRevisionsConstraints)
-maxDate =  ZonedDateTime(DateTime(2038, 1, 19,14,7), tz"UTC")
-maxDateSQL = SQLInput(maxDate)
-infinityKey = 9223372036854775807 ::Integer
+MaxDate =  ZonedDateTime(DateTime(2038, 1, 19,14,7), tz"UTC")
+MaxDateSQL = SQLInput(MaxDate)
+InfinityKey = 9223372036854775807 ::Integer
 
 SearchLight.query("""
-INSERT INTO histories VALUES($infinityKey,0)
+INSERT INTO histories VALUES($InfinityKey,0)
 """
 )
 SearchLight.query("""
-INSERT INTO versions VALUES($infinityKey)
+INSERT INTO versions VALUES($InfinityKey)
 """
 )
   

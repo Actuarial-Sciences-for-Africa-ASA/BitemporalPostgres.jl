@@ -130,7 +130,7 @@ tr4.description = "green"
 t1=TestDummyComponent()
 tr5=TestDummyComponentRevision(description="pink")
 
-# @test tr3.ref_invalidfrom==maxVersion
+# @test tr3.ref_invalidfrom==MaxVersion
 
 update_entity!(w4)
 update_component!(tr3, tr4, w4)
@@ -144,7 +144,7 @@ println(tr5)
     @test findcomponentrevision(TestDummyComponentRevision, t1.id, v4)[1].description == "pink"
     @test w4.ref_version == tr3.ref_invalidfrom
     @test w4.ref_version == tr4.ref_validfrom
-    @test maxVersion == tr4.ref_invalidfrom
+    @test MaxVersion == tr4.ref_invalidfrom
     @test w4.ref_version == tr5.ref_validfrom
 end
 println(tr4)
@@ -153,11 +153,12 @@ println(tr3)
 currentVersion = find(Version, SQLWhereExpression("id=?", w4.ref_version))[1]
 currentInterval =    find(ValidityInterval, SQLWhereExpression("ref_version=?", w4.ref_version))[1]
 tr3b = find(TestDummyComponentRevision,SQLWhereExpression("id=?",tr3.id))[1]
-delete(currentVersion)
+# delete(currentVersion)
+rollback_workflow!(w4)
 tr3b = find(TestDummyComponentRevision,SQLWhereExpression("id=?",tr3.id))[1]
 println(tr3b)
 @testset "rollback transaction tests" begin
-    @test tr3b.ref_invalidfrom == maxVersion
+    @test tr3b.ref_invalidfrom == MaxVersion
     @test findcomponentrevision(TestDummyComponentRevision, t.id, DbId(4))[1].description == "red"
     @test isempty(find(TestDummyComponentRevision, SQLWhereExpression("id=?", tr4.id)))
     @test isempty(find(TestDummyComponent, SQLWhereExpression("id=?", t1.id)))

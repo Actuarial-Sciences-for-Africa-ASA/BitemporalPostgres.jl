@@ -29,9 +29,10 @@ export History,
     update_component!,
     delete_component!,
     commit_workflow!,
-    maxVersion,
-    maxDate,
-    infinityKey,
+    rollback_workflow!,
+    MaxVersion,
+    MaxDate,
+    InfinityKey,
     up,
     down
 
@@ -51,8 +52,8 @@ export History,
     id::DbId = DbId()
     ref_history::DbId = 0
     ref_version::DbId = 0
-    tsdb_validfrom::ZonedDateTime = maxDate
-    tsw_validfrom::ZonedDateTime = maxDate
+    tsdb_validfrom::ZonedDateTime = MaxDate
+    tsw_validfrom::ZonedDateTime = MaxDate
     is_committed::Integer = 0
 end
 
@@ -75,10 +76,10 @@ end
     dummy::Integer = 0
 end
 # One ms less than the maximum date, as 
-maxDate = ZonedDateTime(DateTime(2038, 1, 19, 3, 14, 6, 999), tz"UTC")
-maxDateSQL = SQLInput(maxDate)
-infinityKey = 9223372036854775807::Integer
-maxVersion = DbId(infinityKey)
+const MaxDate = ZonedDateTime(DateTime(2038, 1, 19, 3, 14, 6, 999), tz"UTC")
+const MaxDateSQL = SQLInput(MaxDate)
+const InfinityKey = 9223372036854775807::Integer
+const MaxVersion = DbId(InfinityKey)
 """
   Version
 
@@ -87,7 +88,7 @@ maxVersion = DbId(infinityKey)
 """
 @kwdef mutable struct Version <: AbstractModel
     id::DbId = DbId()
-    ref_history::DbId = infinityKey
+    ref_history::DbId = InfinityKey
 end
 
 """
@@ -103,12 +104,12 @@ ValidityInterval
 """
 @kwdef mutable struct ValidityInterval <: AbstractModel
     id::DbId = DbId()
-    ref_history::DbId = infinityKey
-    ref_version::DbId = infinityKey
+    ref_history::DbId = InfinityKey
+    ref_version::DbId = InfinityKey
     tsrworld::Interval{ZonedDateTime,Closed,Open} =
-        Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"), maxDate)
+        Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"), MaxDate)
     tsrdb::Interval{ZonedDateTime,Closed,Open} =
-        Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"), maxDate)
+        Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"), MaxDate)
     is_committed::Integer = 0
 end
 
@@ -216,8 +217,8 @@ TestDummyComponent <: Component
 """
 @kwdef mutable struct TestDummyComponent <: Component
     id::DbId = DbId()
-    ref_history::DbId = infinityKey
-    ref_version::DbId = infinityKey
+    ref_history::DbId = InfinityKey
+    ref_version::DbId = InfinityKey
 end
 
 """
@@ -235,9 +236,9 @@ TestDummyComponentRevision <: ComponentRevision
 """
 @kwdef mutable struct TestDummyComponentRevision <: ComponentRevision
     id::DbId = DbId()
-    ref_component::DbId = infinityKey
-    ref_validfrom::DbId = infinityKey
-    ref_invalidfrom::DbId = infinityKey
+    ref_component::DbId = InfinityKey
+    ref_validfrom::DbId = InfinityKey
+    ref_invalidfrom::DbId = InfinityKey
     description::String = ""
 end
 
@@ -253,9 +254,9 @@ TestDummySubComponent <: Component
 """
 @kwdef mutable struct TestDummySubComponent <: SubComponent
     id::DbId = DbId()
-    ref_history::DbId = infinityKey
-    ref_super::DbId = infinityKey
-    ref_version::DbId = infinityKey
+    ref_history::DbId = InfinityKey
+    ref_super::DbId = InfinityKey
+    ref_version::DbId = InfinityKey
 end
 
 """
@@ -275,9 +276,9 @@ TestDummySubComponentRevision <: ComponentRevision
 """
 @kwdef mutable struct TestDummySubComponentRevision <: ComponentRevision
     id::DbId = DbId()
-    ref_component::DbId = infinityKey
-    ref_validfrom::DbId = infinityKey
-    ref_invalidfrom::DbId = infinityKey
+    ref_component::DbId = InfinityKey
+    ref_validfrom::DbId = InfinityKey
+    ref_invalidfrom::DbId = InfinityKey
     description::String = ""
 end
 
@@ -342,10 +343,10 @@ function create_entity!(w::Workflow)
         i = ValidityInterval(
             ref_history = h.id,
             ref_version = v.id,
-            tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom, maxDate),
+            tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom, MaxDate),
             tsrdb = Interval{ZonedDateTime,Closed,Open}(
                 now(tz"Africa/Porto-Novo"),
-                maxDate,
+                MaxDate,
             ),
         )
         save!(i)
@@ -416,10 +417,10 @@ function update_entity!(w::Workflow)
         i = ValidityInterval(
             ref_history = hid,
             ref_version = v.id,
-            tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom, maxDate),
+            tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom, MaxDate),
             tsrdb = Interval{ZonedDateTime,Closed,Open}(
                 now(tz"Africa/Porto-Novo"),
-                maxDate,
+                MaxDate,
             ),
         )
         save!(i)
@@ -496,7 +497,7 @@ function commit_workflow!(w::Workflow)
             SQLWhereExpression(
                 "ref_history = ?  AND tsrdb @> TIMESTAMPTZ ? AND tsrworld <@ tstzrange(?,?) AND is_committed=1",
                 w.ref_history,
-                maxDate - Dates.Day(1),
+                MaxDate - Dates.Day(1),
                 uncommitted[1].tsrworld.first + Dates.Day(1),
                 uncommitted[1].tsrworld.last,
             ),
@@ -512,7 +513,7 @@ function commit_workflow!(w::Workflow)
             SQLWhereExpression(
                 "ref_history = ?  AND tsrdb @> TIMESTAMPTZ ? AND tsrworld && tstzrange(?,?) AND is_committed=1",
                 w.ref_history,
-                maxDate - Dates.Day(1),
+                MaxDate - Dates.Day(1),
                 uncommitted[1].tsrworld.first + Dates.Day(1),
                 uncommitted[1].tsrworld.last,
             ),
@@ -522,7 +523,7 @@ function commit_workflow!(w::Workflow)
             j = ValidityInterval(
                 ref_history = i.ref_history,
                 ref_version = i.ref_version,
-                tsrdb = Interval{ZonedDateTime,Closed,Open}(w.tsdb_validfrom, maxDate),
+                tsrdb = Interval{ZonedDateTime,Closed,Open}(w.tsdb_validfrom, MaxDate),
                 tsrworld = Interval{ZonedDateTime,Closed,Open}(
                     i.tsrworld.first,
                     uncommitted[1].tsrworld.first,
@@ -548,7 +549,7 @@ rollback_workflow!(w::Workflow)
 """
 function rollback_workflow!(w::Workflow)
     transaction() do
-        v = find(Version, SQLWhereExpression("id=?", w.ref_version))
+        v = find(Version, SQLWhereExpression("id=?", w.ref_version))[1]
         delete(v)
         w.is_committed = 2
         save(w)
