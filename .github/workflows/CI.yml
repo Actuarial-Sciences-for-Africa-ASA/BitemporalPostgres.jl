@@ -35,5 +35,5 @@ jobs:
         uses: julia-actions/setup-julia@v1
         with:
           version: '1.7.1'
-      - run: b
+      - run: GENIE_ENV="test" julia --project=$(pwd) -e'using Pkg;Pkg.test("BitemporalPostgres")'
         shell: bash
