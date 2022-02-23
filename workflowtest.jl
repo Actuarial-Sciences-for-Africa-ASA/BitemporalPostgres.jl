@@ -153,13 +153,14 @@ println(tr3)
 currentVersion = find(Version, SQLWhereExpression("id=?", w4.ref_version))[1]
 currentInterval =    find(ValidityInterval, SQLWhereExpression("ref_version=?", w4.ref_version))[1]
 tr3b = find(TestDummyComponentRevision,SQLWhereExpression("id=?",tr3.id))[1]
-# delete(currentVersion)
-# tr3b = find(TestDummyComponentRevision,SQLWhereExpression("id=?",tr3.id))
-# println(tr3b)
-# @testset "rollback transaction tests" begin
-#     @test isempty(tr3b)
-#     @test findcomponentrevision(TestDummyComponentRevision, t.id, DbId(4))[1].description == "red"
-#     # @test isempty(find(TestDummyComponentRevision, SQLWhereExpression("id=?", tr4.id)))
-#     # @test isempty(find(Version, SQLWhereExpression("id=?", currentVersion.id)))
-#     # @test isempty(find(ValidityInterval, SQLWhereExpression("id=?", currentInterval.id)))
-# end
+delete(currentVersion)
+tr3b = find(TestDummyComponentRevision,SQLWhereExpression("id=?",tr3.id))[1]
+println(tr3b)
+@testset "rollback transaction tests" begin
+    @test tr3b.ref_invalidfrom == maxVersion
+    @test findcomponentrevision(TestDummyComponentRevision, t.id, DbId(4))[1].description == "red"
+    @test isempty(find(TestDummyComponentRevision, SQLWhereExpression("id=?", tr4.id)))
+    @test isempty(find(TestDummyComponent, SQLWhereExpression("id=?", t1.id)))
+    @test isempty(find(Version, SQLWhereExpression("id=?", currentVersion.id)))
+    @test isempty(find(ValidityInterval, SQLWhereExpression("id=?", currentInterval.id)))
+end

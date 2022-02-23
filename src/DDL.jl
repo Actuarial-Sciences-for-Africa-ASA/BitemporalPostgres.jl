@@ -98,6 +98,7 @@ function up()
     [
       column(:id,:bigserial,"PRIMARY KEY")
       column(:ref_history, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
+      column(:ref_version, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
     ]
     end
   
@@ -116,6 +117,7 @@ function up()
     [
       column(:id,:bigserial,"PRIMARY KEY")
       column(:ref_history, :integer,"REFERENCES testdummyComponents(id) ON DELETE CASCADE") 
+      column(:ref_version, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
       column(:ref_super, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
     ]
     end

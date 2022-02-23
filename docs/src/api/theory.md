@@ -183,11 +183,9 @@ Database access to bitemporal objects can be supported by GiST (Generalized Sear
 * timestamp-intervals for database and world validity as well as
 * revision intervals
 
-So in POSTGRES, for example - hava a look at the UML-Diagram below - , we can access a component (with table name *PART*) by a simple join with filters for
-
-* to locate a history's version by timestamps'inclusion in validity intervals and
+So in POSTGRES, for example - hava a look at the UML-Diagram below - , we can access a component (with table name *PART*) by a simple join with filters that locate 
+* a history's version by inclusion of the database and world timestamp in thedatabase and world validity intervals and
 * a *PART*'s revision by the version id's inclusion in the *PART_REVISION*'s range of valid versions.
-
 ```@raw html
 <pre><code>SELECT * FROM histories h
 JOIN version v ON v.ref_history = h.id

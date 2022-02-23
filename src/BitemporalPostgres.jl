@@ -134,6 +134,15 @@ function setref_history(component::Component, ref::DbId)
     component.ref_history = ref
 end
 
+
+function getref_version(component::Component)::DbId
+    component.ref_version
+end
+
+function setref_version(component::Component, ref::DbId)
+    component.ref_version = ref
+end
+
 """
 SubComponent
 
@@ -147,8 +156,8 @@ function getref_super(component::Component)::DbId
     component.ref_super
 end
 
-function setref_super(subcomponent::SubComponent, ref::DbId)
-    subcomponent.ref_super = ref
+function setref_super(component::SubComponent, ref::DbId)
+    component.ref_super = ref
 end
 
 """
@@ -208,6 +217,7 @@ TestDummyComponent <: Component
 @kwdef mutable struct TestDummyComponent <: Component
     id::DbId = DbId()
     ref_history::DbId = infinityKey
+    ref_version::DbId = infinityKey
 end
 
 """
@@ -245,6 +255,7 @@ TestDummySubComponent <: Component
     id::DbId = DbId()
     ref_history::DbId = infinityKey
     ref_super::DbId = infinityKey
+    ref_version::DbId = infinityKey
 end
 
 """
@@ -352,6 +363,7 @@ function create_component!(c::Component, cr::ComponentRevision, w::Workflow)
         hid = w.ref_history
         vid = w.ref_version
         setref_history(c, hid)
+        setref_version(c,vid)
         save!(c)
 
         setref_component(cr, getid(c))
