@@ -13,3 +13,6 @@ SearchLightPostgreSQL = "4327cdd6-4902-11ea-0272-430cea0431bd"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 ToStruct = "43ec2cc1-0e50-5406-a854-b7ff8fdb8dad"
+
+[compat]
+ToStruct = "0.2"
