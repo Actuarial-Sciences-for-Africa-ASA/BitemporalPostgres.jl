@@ -16,3 +16,4 @@ ToStruct = "43ec2cc1-0e50-5406-a854-b7ff8fdb8dad"
 
 [compat]
 TimeZones = "1"
+Documenter = "0.27"
