@@ -5,6 +5,26 @@ import TimeZones
 using SearchLight, TimeZones
 export  create_versions_trigger, create_validity_intervals_constraints, up, down
 
+createTsrTriggerFun = """
+  CREATE OR REPLACE FUNCTION f_bitempranges ()
+  RETURNS trigger AS
+  \$\$
+       DECLARE
+  
+       BEGIN
+            RAISE NOTICE 'NEW: %', NEW;
+            NEW.tsrworld := tstzrange(NEW.tsworld_validfrom,NEW.tsworld_invalidfrom,'[)');
+            NEW.tsrdb := tstzrange(NEW.tsdb_validfrom,NEW.tsdb_invalidfrom,'[)');
+            RETURN NEW;
+       END;
+  \$\$ LANGUAGE 'plpgsql';
+  """
+  createBitempTrigger = """
+  CREATE TRIGGER versions_trig
+  BEFORE INSERT OR UPDATE ON validityIntervals
+  FOR EACH ROW EXECUTE PROCEDURE f_bitempranges();
+  """
+
 """
 create_versions_trigger()
   propagate skalars ref_validfrom and ref_invalidfrom to range ref_valid
@@ -88,6 +108,10 @@ function up()
         column(:id,:bigserial,"PRIMARY KEY")
         column(:ref_history, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
         column(:ref_version, :integer,"REFERENCES versions(id) ON DELETE CASCADE")
+        column(:tsworld_validfrom, :timestamptz,"(3)")
+        column(:tsworld_invalidfrom, :timestamptz,"(3)")
+        column(:tsdb_validfrom, :timestamptz,"(3)")
+        column(:tsdb_invalidfrom, :timestamptz,"(3)")
         column(:tsrworld, :tstzrange)
         column(:tsrdb, :tstzrange) 
         column(:is_committed, :integer)
@@ -158,6 +182,8 @@ function up()
 
 SearchLight.query(createGistExtension)
 create_validity_intervals_constraints()
+SearchLight.query(createTsrTriggerFun)
+SearchLight.query(createBitempTrigger)
 create_versions_trigger()
 SearchLight.query(createTestdummyComponentRevisionsTrigger)
 SearchLight.query(createTestdummyComponentRevisionsConstraints)
