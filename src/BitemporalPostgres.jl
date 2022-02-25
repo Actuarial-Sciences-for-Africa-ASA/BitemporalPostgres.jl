@@ -106,10 +106,10 @@ ValidityInterval
     id::DbId = DbId()
     ref_history::DbId = InfinityKey
     ref_version::DbId = InfinityKey
-    tsrworld::Interval{ZonedDateTime,Closed,Open} =
-        Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"), MaxDate)
-    tsrdb::Interval{ZonedDateTime,Closed,Open} =
-        Interval{ZonedDateTime,Closed,Open}(now(tz"UTC"), MaxDate)
+    tsdb_validfrom::ZonedDateTime = now(tz"UTC")
+    tsworld_validfrom::ZonedDateTime = now(tz"UTC")
+    tsdb_invalidfrom::ZonedDateTime = MaxDate
+    tsworld_invalidfrom::ZonedDateTime = MaxDate
     is_committed::Integer = 0
 end
 
@@ -343,11 +343,10 @@ function create_entity!(w::Workflow)
         i = ValidityInterval(
             ref_history = h.id,
             ref_version = v.id,
-            tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom, MaxDate),
-            tsrdb = Interval{ZonedDateTime,Closed,Open}(
-                now(tz"Africa/Porto-Novo"),
-                MaxDate,
-            ),
+            tsworld_validfrom=w.tsw_validfrom,
+            tsworld_invalidfrom = MaxDate,
+            tsdb_validfrom = now(tz"Africa/Porto-Novo"),
+            tsdb_invalidfrom = MaxDate
         )
         save!(i)
     end
@@ -417,11 +416,10 @@ function update_entity!(w::Workflow)
         i = ValidityInterval(
             ref_history = hid,
             ref_version = v.id,
-            tsrworld = Interval{ZonedDateTime,Closed,Open}(w.tsw_validfrom, MaxDate),
-            tsrdb = Interval{ZonedDateTime,Closed,Open}(
-                now(tz"Africa/Porto-Novo"),
-                MaxDate,
-            ),
+            tsworld_validfrom=w.tsw_validfrom,
+            tsworld_invalidfrom = MaxDate,
+            tsdb_validfrom = now(tz"Africa/Porto-Novo"),
+            tsdb_invalidfrom = MaxDate
         )
         save!(i)
     end
@@ -498,13 +496,13 @@ function commit_workflow!(w::Workflow)
                 "ref_history = ?  AND tsrdb @> TIMESTAMPTZ ? AND tsrworld <@ tstzrange(?,?) AND is_committed=1",
                 w.ref_history,
                 MaxDate - Dates.Day(1),
-                uncommitted[1].tsrworld.first + Dates.Day(1),
-                uncommitted[1].tsrworld.last,
+                uncommitted[1].tsworld_validfrom + Dates.Day(1),
+                uncommitted[1].tsworld_invalidfrom,
             ),
         )
 
         for i in shadowed
-            i.tsrdb = Interval{ZonedDateTime,Closed,Open}(i.tsrdb.first, w.tsdb_validfrom)
+            i.tsdb_invalidfrom =w.tsdb_validfrom
             save!(i)
         end
 
@@ -514,20 +512,19 @@ function commit_workflow!(w::Workflow)
                 "ref_history = ?  AND tsrdb @> TIMESTAMPTZ ? AND tsrworld && tstzrange(?,?) AND is_committed=1",
                 w.ref_history,
                 MaxDate - Dates.Day(1),
-                uncommitted[1].tsrworld.first + Dates.Day(1),
-                uncommitted[1].tsrworld.last,
+                uncommitted[1].tsworld_validfrom + Dates.Day(1),
+                uncommitted[1].tsworld_invalidfrom,
             ),
         )
         for i in overlapped
-            i.tsrdb = Interval{ZonedDateTime,Closed,Open}(i.tsrdb.first, w.tsdb_validfrom)
+            i.tsdb_invalidfrom = w.tsdb_validfrom
             j = ValidityInterval(
                 ref_history = i.ref_history,
                 ref_version = i.ref_version,
-                tsrdb = Interval{ZonedDateTime,Closed,Open}(w.tsdb_validfrom, MaxDate),
-                tsrworld = Interval{ZonedDateTime,Closed,Open}(
-                    i.tsrworld.first,
-                    uncommitted[1].tsrworld.first,
-                ),
+                tsworld_validfrom=i.tsworld_validfrom,
+                tsworld_invalidfrom = uncommitted[1].tsworld_validfrom,
+                tsdb_validfrom = w.tsdb_validfrom,
+                tsdb_invalidfrom = MaxDate,
                 is_committed = 1,
             )
             save!(i)

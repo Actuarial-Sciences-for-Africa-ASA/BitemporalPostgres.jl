@@ -95,9 +95,9 @@ version = "0.8.6"
 
 [[deps.Documenter]]
 deps = ["ANSIColoredPrinters", "Base64", "Dates", "DocStringExtensions", "IOCapture", "InteractiveUtils", "JSON", "LibGit2", "Logging", "Markdown", "REPL", "Test", "Unicode"]
-git-tree-sha1 = "75c6cf9d99e0efc79b724f5566726ad3ad010a01"
+git-tree-sha1 = "2c023382ab49c40475fcf59b90ba1c8edd9ff45e"
 uuid = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-version = "0.27.12"
+version = "0.27.13"
 
 [[deps.DocumenterTools]]
 deps = ["AbstractTrees", "Base64", "DocStringExtensions", "Documenter", "FileWatching", "Gumbo", "LibGit2", "Sass"]
@@ -391,10 +391,8 @@ uuid = "322a6be2-4ae8-5d68-aaf1-3e960788d1d9"
 version = "0.2.0"
 
 [[deps.SearchLight]]
-deps = ["DataFrames", "Dates", "Distributed", "Inflector", "Intervals", "JSON3", "Logging", "Millboard", "OrderedCollections", "Reexport", "SHA", "Unicode", "YAML"]
-git-tree-sha1 = "44cad9637cb402137893ed09d8282c51ae72978f"
-repo-rev = "master"
-repo-url = "https://github.com/GenieFramework/SearchLight.jl"
+deps = ["DataFrames", "Dates", "Distributed", "Inflector", "JSON3", "Logging", "Millboard", "OrderedCollections", "Reexport", "SHA", "Unicode", "YAML"]
+git-tree-sha1 = "232478f3c672441fe88b23a8a75a74845c3b4d49"
 uuid = "340e8cb6-72eb-11e8-37ce-c97ebeb32050"
 version = "2.2.0"
 
