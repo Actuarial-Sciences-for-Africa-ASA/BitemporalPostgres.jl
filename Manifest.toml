@@ -338,9 +338,9 @@ version = "1.4.0"
 
 [[deps.Preferences]]
 deps = ["TOML"]
-git-tree-sha1 = "2cf929d64681236a2e074ffafb8d568733d2e6af"
+git-tree-sha1 = "de893592a221142f3db370f48290e3a2ef39998f"
 uuid = "21216c6a-2e73-6563-6e65-726566657250"
-version = "1.2.3"
+version = "1.2.4"
 
 [[deps.PrettyTables]]
 deps = ["Crayons", "Formatting", "Markdown", "Reexport", "Tables"]
@@ -392,9 +392,9 @@ version = "0.2.0"
 
 [[deps.SearchLight]]
 deps = ["DataFrames", "Dates", "Distributed", "Inflector", "Intervals", "JSON3", "Logging", "Millboard", "OrderedCollections", "Reexport", "SHA", "Unicode", "YAML"]
-git-tree-sha1 = "a05485043f7ab6fdc74189b05da5446967f238fb"
+git-tree-sha1 = "44cad9637cb402137893ed09d8282c51ae72978f"
 repo-rev = "master"
-repo-url = "https://github.com/Kaeptenblaubaer/SearchLight.jl"
+repo-url = "https://github.com/GenieFramework/SearchLight.jl"
 uuid = "340e8cb6-72eb-11e8-37ce-c97ebeb32050"
 version = "2.2.0"
 
