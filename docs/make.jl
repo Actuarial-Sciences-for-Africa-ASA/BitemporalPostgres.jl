@@ -1,7 +1,6 @@
 push!(LOAD_PATH,"../src/") 
 using Documenter
-using BitemporalPostgres, BitemporalPostgres.DDL
-
+import BitemporalPostgres, BitemporalPostgres.DDL
 makedocs(
     sitename = "BitemporalPostgres",
     format = Documenter.HTML(),
