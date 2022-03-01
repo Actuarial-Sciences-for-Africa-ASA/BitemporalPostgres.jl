@@ -11,3 +11,8 @@ For theory behind this, see the theory page.
 
 ```@index
 ```
+```@contents
+Pages = ["api/theory.md"]
+Depth = 5
+```
+
