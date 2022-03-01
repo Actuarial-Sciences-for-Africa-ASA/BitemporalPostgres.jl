@@ -1,5 +1,5 @@
-site_name:        BitemproalPostgres
-repo_url:         https://github.com/Kaeptenblaubaer/BitemporalPostgres
+site_name:        BitemporalPostgres
+repo_url:         https://github.com/michaelfliegner/BitemporalPostgres.jl
 site_description: BitemporalPostgres provides an API for application based bitemporal transactions with Julia and Postgres DB.
 site_author:      Michael Fliegner
 
