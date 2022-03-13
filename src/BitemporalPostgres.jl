@@ -532,6 +532,7 @@ function commit_workflow!(w::Workflow)
         end
         for i in uncommitted
             i.is_committed = 1
+            i.tsdb_validfrom = w.tsdb_validfrom
             save!(i)
         end
         w.is_committed = 1
