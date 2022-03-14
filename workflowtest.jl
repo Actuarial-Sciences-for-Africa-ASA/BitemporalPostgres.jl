@@ -165,23 +165,4 @@ println(tr3b)
     @test isempty(find(Version, SQLWhereExpression("id=?", currentVersion.id)))
     @test isempty(find(ValidityInterval, SQLWhereExpression("id=?", currentInterval.id)))
 
-
-root = find(
-    ValidityInterval,
-    SQLWhereExpression("ref_history=? AND tsrdb @> now()", w1.ref_history),
-)[1]
-
-shadowed = find(
-    ValidityInterval,
-    SQLWhereExpression(
-        "ref_history=? AND tsdb_invalidfrom=? AND tstzrange(?,?) * tsrworld = tsrworld",
-        root.ref_history,
-        root.tsdb_validfrom,
-        root.tsworld_validfrom,
-        root.tsworld_invalidfrom,
-    )
-)
-
-@test ! isempty(shadowed)
-
 end
