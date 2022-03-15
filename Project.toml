@@ -16,6 +16,7 @@ ToStruct = "43ec2cc1-0e50-5406-a854-b7ff8fdb8dad"
 
 [compat]
 Documenter = "0.27"
+AbstractTrees = "0.3"
 Intervals = "1"
 SearchLight = "2"
 SearchLightPostgreSQL = "2"
