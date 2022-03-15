@@ -4,8 +4,7 @@ SearchLight.Configuration.load() |> SearchLight.connect
 SearchLight.Migrations.create_migrations_table()
 SearchLight.Migrations.up()
 using BitemporalPostgres, Dates, SearchLight, Test, TimeZones
-#=
-workflow w1 blue rectangle
+#=workflow w1 blue rectangle 
 =#
 w1 = Workflow()
 w1.tsw_validfrom = ZonedDateTime(2014, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo")
@@ -127,8 +126,8 @@ w4 = Workflow(
 )
 tr4 = copy(tr3)
 tr4.description = "green"
-t1=TestDummyComponent()
-tr5=TestDummyComponentRevision(description="pink")
+t1 = TestDummyComponent()
+tr5 = TestDummyComponentRevision(description = "pink")
 
 # @test tr3.ref_invalidfrom==MaxVersion
 
@@ -139,9 +138,11 @@ create_component!(t1, tr5, w4)
 println(tr5)
 
 @testset "pending transaction tests" begin
-    v4=find(Version,SQLWhereExpression("id=?", w4.ref_version))[1].id
-    @test findcomponentrevision(TestDummyComponentRevision, t.id, v4)[1].description == "green"
-    @test findcomponentrevision(TestDummyComponentRevision, t1.id, v4)[1].description == "pink"
+    v4 = find(Version, SQLWhereExpression("id=?", w4.ref_version))[1].id
+    @test findcomponentrevision(TestDummyComponentRevision, t.id, v4)[1].description ==
+          "green"
+    @test findcomponentrevision(TestDummyComponentRevision, t1.id, v4)[1].description ==
+          "pink"
     @test w4.ref_version == tr3.ref_invalidfrom
     @test w4.ref_version == tr4.ref_validfrom
     @test MaxVersion == tr4.ref_invalidfrom
@@ -151,18 +152,30 @@ println(tr4)
 println(tr3)
 
 currentVersion = find(Version, SQLWhereExpression("id=?", w4.ref_version))[1]
-currentInterval =    find(ValidityInterval, SQLWhereExpression("ref_version=?", w4.ref_version))[1]
-tr3b = find(TestDummyComponentRevision,SQLWhereExpression("id=?",tr3.id))[1]
+currentInterval =
+    find(ValidityInterval, SQLWhereExpression("ref_version=?", w4.ref_version))[1]
+tr3b = find(TestDummyComponentRevision, SQLWhereExpression("id=?", tr3.id))[1]
 # delete(currentVersion)
 rollback_workflow!(w4)
-tr3b = find(TestDummyComponentRevision,SQLWhereExpression("id=?",tr3.id))[1]
+tr3b = find(TestDummyComponentRevision, SQLWhereExpression("id=?", tr3.id))[1]
 println(tr3b)
 @testset "rollback transaction tests" begin
     @test tr3b.ref_invalidfrom == MaxVersion
-    @test findcomponentrevision(TestDummyComponentRevision, t.id, DbId(4))[1].description == "red"
+    @test findcomponentrevision(TestDummyComponentRevision, t.id, DbId(4))[1].description ==
+          "red"
     @test isempty(find(TestDummyComponentRevision, SQLWhereExpression("id=?", tr4.id)))
     @test isempty(find(TestDummyComponent, SQLWhereExpression("id=?", t1.id)))
     @test isempty(find(Version, SQLWhereExpression("id=?", currentVersion.id)))
     @test isempty(find(ValidityInterval, SQLWhereExpression("id=?", currentInterval.id)))
 
+end
+
+@testset "mkforest" begin
+    hforest =
+        mkforest(DbId(1), MaxDate, ZonedDateTime(1900, 1, 1, 0, 0, 0, 0, tz"UTC"), MaxDate)
+    print_tree(hforest)
+    @test hforest[1].interval.ref_version.value == 3
+    @test hforest[1].shadowed[1].interval.ref_version.value == 2
+    @test hforest[2].interval.ref_version.value == 1
+    @test isempty(hforest[2].shadowed)
 end

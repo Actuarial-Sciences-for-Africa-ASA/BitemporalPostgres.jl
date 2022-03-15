@@ -132,13 +132,28 @@ c_{3} =& [v_{blue}, v_{∞})
 \end{aligned}
 ```
 
-### Textual representation of mutation histories
+## Textual representation of mutation histories
+
+A practically interesting aspect of a history of mutations is, which mutations are made
+to represent consecutive changes of the domain and which ones are retrospective corrections.
+This can be represented by a tree of vectors of version nodes where
+
+* nodes in one vector denote consecutive mutations and
+* child node vectors denote mutations which have been retrospectively corrected by their predecessor
 
 ```math
+\text{let} \\
 \begin{aligned}
-h =\{ s | i \cap s = s \}
+i=&([t_{0},[t_{1}),[t_{2},t_{3})) \\
+shadowed(i) =&\{ ([d_{lower},d_{upper}) [w_{lower},w_{upper}) | d_{upper} = t_{0} \land [w_{lower},w_{upper}) \cap [t_{2},t_{3}) = [w_{lower},w_{upper}) \}
 \end{aligned}
 ```
+
+### textual represention of our example
+
+* red
+  * yellow
+* blue
 
 ## Bitemporal Transactions
 

@@ -4,7 +4,12 @@ import SearchLightPostgreSQL
 import Base: @kwdef
 import Intervals, Dates, TimeZones
 using Intervals,
-    Dates, SearchLight, SearchLight.Transactions, SearchLightPostgreSQL, TimeZones
+    Dates,
+    SearchLight,
+    SearchLight.Transactions,
+    SearchLightPostgreSQL,
+    TimeZones,
+    AbstractTrees
 include("DDL.jl")
 using .DDL
 export History,
@@ -34,7 +39,10 @@ export History,
     MaxDate,
     InfinityKey,
     up,
-    down
+    down,
+    Node,
+    print_tree,
+    mkforest
 
 """
   Workflow
@@ -343,10 +351,10 @@ function create_entity!(w::Workflow)
         i = ValidityInterval(
             ref_history = h.id,
             ref_version = v.id,
-            tsworld_validfrom=w.tsw_validfrom,
+            tsworld_validfrom = w.tsw_validfrom,
             tsworld_invalidfrom = MaxDate,
             tsdb_validfrom = now(tz"Africa/Porto-Novo"),
-            tsdb_invalidfrom = MaxDate
+            tsdb_invalidfrom = MaxDate,
         )
         save!(i)
     end
@@ -363,7 +371,7 @@ function create_component!(c::Component, cr::ComponentRevision, w::Workflow)
         hid = w.ref_history
         vid = w.ref_version
         setref_history(c, hid)
-        setref_version(c,vid)
+        setref_version(c, vid)
         save!(c)
 
         setref_component(cr, getid(c))
@@ -416,10 +424,10 @@ function update_entity!(w::Workflow)
         i = ValidityInterval(
             ref_history = hid,
             ref_version = v.id,
-            tsworld_validfrom=w.tsw_validfrom,
+            tsworld_validfrom = w.tsw_validfrom,
             tsworld_invalidfrom = MaxDate,
             tsdb_validfrom = now(tz"Africa/Porto-Novo"),
-            tsdb_invalidfrom = MaxDate
+            tsdb_invalidfrom = MaxDate,
         )
         save!(i)
     end
@@ -502,7 +510,7 @@ function commit_workflow!(w::Workflow)
         )
 
         for i in shadowed
-            i.tsdb_invalidfrom =w.tsdb_validfrom
+            i.tsdb_invalidfrom = w.tsdb_validfrom
             save!(i)
         end
 
@@ -521,7 +529,7 @@ function commit_workflow!(w::Workflow)
             j = ValidityInterval(
                 ref_history = i.ref_history,
                 ref_version = i.ref_version,
-                tsworld_validfrom=i.tsworld_validfrom,
+                tsworld_validfrom = i.tsworld_validfrom,
                 tsworld_invalidfrom = uncommitted[1].tsworld_validfrom,
                 tsdb_validfrom = w.tsdb_validfrom,
                 tsdb_invalidfrom = MaxDate,
@@ -552,6 +560,61 @@ function rollback_workflow!(w::Workflow)
         w.is_committed = 2
         save(w)
     end
+end
+
+"""
+Node
+
+node of tree of mutations 
+"""
+struct Node
+    interval::ValidityInterval
+    shadowed::Vector{Node}
+end
+
+function children(n::Node)
+    return n.shadowed
+end
+
+printnode(io::IO, n::Node) =
+    print(io, n.interval.ref_history.value * n.interval.ref_version.value)
+
+"""
+mkforest(hid::DbId,tsdb_invalidfrom::ZonedDateTime,tsworld_validfrom::ZonedDateTime,tsworld_invalidfrom::ZonedDateTime,)::Vector{Node}
+
+    builds a tree of vectors of version nodes where
+
+    * nodes in one vector denote conecutive mutations and
+    * child node vectors denote mutations which have been retrospectively corrected by their predecessor
+    
+
+    see: Theory: Textual representation of mutation histories
+
+"""
+function mkforest(
+    hid::DbId,
+    tsdb_invalidfrom::ZonedDateTime,
+    tsworld_validfrom::ZonedDateTime,
+    tsworld_invalidfrom::ZonedDateTime,
+)::Vector{Node}
+    forest = find(
+        ValidityInterval,
+        SQLWhereExpression(
+            "ref_history=? AND  upper(tsrdb)=? AND tstzrange(?,?) * tsrworld = tsrworld",
+            hid,
+            tsdb_invalidfrom,
+            tsworld_validfrom,
+            tsworld_invalidfrom,
+        ),
+    )
+    shadowed::Vector{Node} = map(
+        i::ValidityInterval -> Node(
+            i,
+            mkforest(hid, i.tsdb_validfrom, i.tsworld_validfrom, i.tsworld_invalidfrom),
+        ),
+        forest,
+    )
+    return shadowed
 end
 
 end # module
