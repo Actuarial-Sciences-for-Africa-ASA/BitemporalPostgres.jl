@@ -8,5 +8,4 @@ Pkg.add("Intervals")
 Pkg.add("TimeZones")
 Pkg.add("Dates")
 Pkg.add("ToStruct")
-Pkg.add("Documenter")
 import BitemporalPostgres
