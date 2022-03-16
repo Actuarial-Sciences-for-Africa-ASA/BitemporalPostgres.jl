@@ -597,24 +597,22 @@ function mkforest(
     tsworld_validfrom::ZonedDateTime,
     tsworld_invalidfrom::ZonedDateTime,
 )::Vector{Node}
-    forest = find(
-        ValidityInterval,
-        SQLWhereExpression(
-            "ref_history=? AND  upper(tsrdb)=? AND tstzrange(?,?) * tsrworld = tsrworld",
-            hid,
-            tsdb_invalidfrom,
-            tsworld_validfrom,
-            tsworld_invalidfrom,
-        ),
-    )
-    shadowed::Vector{Node} = map(
+    map(
         i::ValidityInterval -> Node(
             i,
             mkforest(hid, i.tsdb_validfrom, i.tsworld_validfrom, i.tsworld_invalidfrom),
         ),
-        forest,
+        find(
+            ValidityInterval,
+            SQLWhereExpression(
+                "ref_history=? AND  upper(tsrdb)=? AND tstzrange(?,?) * tsrworld = tsrworld",
+                hid,
+                tsdb_invalidfrom,
+                tsworld_validfrom,
+                tsworld_invalidfrom,
+            ),
+        ),
     )
-    return shadowed
 end
 
 end # module
