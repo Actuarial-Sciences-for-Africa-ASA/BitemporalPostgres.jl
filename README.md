@@ -4,6 +4,9 @@
 
 [![pages-build-deployment](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/pages/pages-build-deployment)
 
+[![pkgeval](https://juliahub.com/docs/BitemporalPostgres/pkgeval.svg)](https://juliahub.com/ui/Packages/BitemporalPostgres/ZmypI) Testing on Juliahub fails as PkgEval is not applicable because tests require a running POSTGRES server.
+
+
 # BitemporalPostgres provides an API for application based bitemporal transactions with Julia and Postgres DB. Transactions are "long", with persistent transaction data that is, so they can serve as a basis of workflow management: they can be suspended, resumed and delegated.
 
 Documentation
