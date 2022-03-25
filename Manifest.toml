@@ -259,9 +259,9 @@ version = "1.10.8"
 
 [[OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "648107615c15d4e09f7eca16307bc821c1f718d8"
+git-tree-sha1 = "ab05aa4cc89736e95915b01e7279e61b1bfe33b8"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "1.1.13+0"
+version = "1.1.14+0"
 
 [[OrderedCollections]]
 git-tree-sha1 = "85f8e6578bf1f9ee0d11e7bb1b1456435479d47c"
@@ -280,9 +280,9 @@ uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 
 [[PooledArrays]]
 deps = ["DataAPI", "Future"]
-git-tree-sha1 = "db3a23166af8aebf4db5ef87ac5b00d36eb771e2"
+git-tree-sha1 = "28ef6c7ce353f0b35d0df0d5930e0d072c1f5b9b"
 uuid = "2dfb63ee-cc39-5dd5-95bd-886bf059d720"
-version = "1.4.0"
+version = "1.4.1"
 
 [[Preferences]]
 deps = ["TOML"]
@@ -340,7 +340,9 @@ version = "2.2.0"
 
 [[SearchLightPostgreSQL]]
 deps = ["DataFrames", "LibPQ", "Logging", "SearchLight"]
-git-tree-sha1 = "1a5b9d3933bd0e5513043b65be562a86cc0bbd13"
+git-tree-sha1 = "c172f8ed1e1e8d153a34abfb530ce0f04c775032"
+repo-rev = "master"
+repo-url = "https://github.com/michaelfliegner/SearchLightPostgreSQL.jl"
 uuid = "4327cdd6-4902-11ea-0272-430cea0431bd"
 version = "2.1.0"
 
