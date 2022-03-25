@@ -80,7 +80,7 @@ function up()
   create_table(:versions) do
     [
       column(:id,:bigserial,"PRIMARY KEY")
-      column(:ref_history, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
+      column(:ref_history, :bigint,"REFERENCES histories(id) ON DELETE CASCADE")
     ]
   end
 
@@ -88,11 +88,11 @@ function up()
   create_table(:workflows) do
     [
       column(:id,:bigserial,"PRIMARY KEY")
-      column(:ref_history, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
-      column(:ref_version, :integer,"REFERENCES versions(id) ON DELETE CASCADE")
+      column(:ref_history, :bigint,"REFERENCES histories(id) ON DELETE CASCADE")
+      column(:ref_version, :bigint,"REFERENCES versions(id) ON DELETE CASCADE")
       column(:tsw_validfrom, :timestamptz,"(3)")
       column(:tsdb_validfrom, :timestamptz,"(3)")
-      column(:is_committed, :integer)
+      column(:is_committed, :bigint)
     ]
   end
 
@@ -106,32 +106,32 @@ function up()
   create_table(:validityIntervals) do
       [
         column(:id,:bigserial,"PRIMARY KEY")
-        column(:ref_history, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
-        column(:ref_version, :integer,"REFERENCES versions(id) ON DELETE CASCADE")
+        column(:ref_history, :bigint,"REFERENCES histories(id) ON DELETE CASCADE")
+        column(:ref_version, :bigint,"REFERENCES versions(id) ON DELETE CASCADE")
         column(:tsworld_validfrom, :timestamptz,"(3)")
         column(:tsworld_invalidfrom, :timestamptz,"(3)")
         column(:tsdb_validfrom, :timestamptz,"(3)")
         column(:tsdb_invalidfrom, :timestamptz,"(3)")
         column(:tsrworld, :tstzrange)
         column(:tsrdb, :tstzrange) 
-        column(:is_committed, :integer)
+        column(:is_committed, :bigint)
       ]
   end
 
   create_table(:testdummyComponents) do
     [
       column(:id,:bigserial,"PRIMARY KEY")
-      column(:ref_history, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
-      column(:ref_version, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
+      column(:ref_history, :bigint,"REFERENCES histories(id) ON DELETE CASCADE")
+      column(:ref_version, :bigint, "REFERENCES versions(id) ON DELETE CASCADE")
     ]
     end
   
     create_table(:testdummyComponentRevisions) do
       [
         column(:id,:bigserial,"PRIMARY KEY")
-        column(:ref_component, :integer, "REFERENCES testdummyComponents(id)")
-        column(:ref_validfrom, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
-        column(:ref_invalidfrom, :integer, "DEFAULT 9223372036854775807 REFERENCES versions(id) ON DELETE SET DEFAULT")
+        column(:ref_component, :bigint, "REFERENCES testdummyComponents(id)")
+        column(:ref_validfrom, :bigint, "REFERENCES versions(id) ON DELETE CASCADE")
+        column(:ref_invalidfrom, :bigint, "DEFAULT 9223372036854775807 REFERENCES versions(id) ON DELETE SET DEFAULT")
         column(:ref_valid, :int8range)
         column(:description, :string)
       ]
@@ -140,18 +140,18 @@ function up()
   create_table(:testdummySubComponents) do
     [
       column(:id,:bigserial,"PRIMARY KEY")
-      column(:ref_history, :integer,"REFERENCES testdummyComponents(id) ON DELETE CASCADE") 
-      column(:ref_version, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
-      column(:ref_super, :integer,"REFERENCES histories(id) ON DELETE CASCADE")
+      column(:ref_history, :bigint,"REFERENCES testdummyComponents(id) ON DELETE CASCADE") 
+      column(:ref_version, :bigint, "REFERENCES versions(id) ON DELETE CASCADE")
+      column(:ref_super, :bigint,"REFERENCES histories(id) ON DELETE CASCADE")
     ]
     end
   
     create_table(:testdummySubComponentRevisions) do
       [
         column(:id,:bigserial,"PRIMARY KEY")
-        column(:ref_component, :integer, "REFERENCES testdummySubComponents(id)")
-        column(:ref_validfrom, :integer, "REFERENCES versions(id) ON DELETE CASCADE")
-        column(:ref_invalidfrom, :integer, "DEFAULT 9223372036854775807 REFERENCES versions(id) ON DELETE SET DEFAULT")
+        column(:ref_component, :bigint, "REFERENCES testdummySubComponents(id)")
+        column(:ref_validfrom, :bigint, "REFERENCES versions(id) ON DELETE CASCADE")
+        column(:ref_invalidfrom, :bigint, "DEFAULT 9223372036854775807 REFERENCES versions(id) ON DELETE SET DEFAULT")
         column(:ref_valid, :int8range)
         column(:description, :string)
       ]
