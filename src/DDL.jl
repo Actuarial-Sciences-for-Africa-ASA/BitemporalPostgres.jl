@@ -100,6 +100,7 @@ function up()
     [
       column(:id,:bigserial,"PRIMARY KEY")
       column(:i, :tstzrange)
+      column(:year, :integer, limit = 4)
     ]
   end
   

@@ -340,11 +340,9 @@ version = "2.2.0"
 
 [[SearchLightPostgreSQL]]
 deps = ["DataFrames", "LibPQ", "Logging", "SearchLight"]
-git-tree-sha1 = "c172f8ed1e1e8d153a34abfb530ce0f04c775032"
-repo-rev = "master"
-repo-url = "https://github.com/michaelfliegner/SearchLightPostgreSQL.jl"
+git-tree-sha1 = "791fd3ba090397b7f1ccd5461cf18c883ed0046e"
 uuid = "4327cdd6-4902-11ea-0272-430cea0431bd"
-version = "2.1.0"
+version = "2.1.1"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
