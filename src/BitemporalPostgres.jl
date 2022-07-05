@@ -13,6 +13,7 @@ using Intervals,
 include("DDL.jl")
 using .DDL
 export History,
+    Role,
     Version,
     Component,
     get_typeof_revision,
@@ -43,6 +44,24 @@ export History,
     Node,
     print_tree,
     mkforest
+
+"""
+Role
+
+  role of a relationship 
+
+"""
+abstract type Role <: AbstractModel end
+
+function get_id(role::Role)::DbId
+    role.id
+end
+function get_domain(role::Role)::DbId
+    role.domain
+end
+function get_value(role::Role)::DbId
+    role.value
+end
 
 """
   Workflow
