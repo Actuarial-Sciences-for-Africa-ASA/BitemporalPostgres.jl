@@ -230,7 +230,7 @@ POSTGRES also provides uniqueness constraints for GIST-indices, so that we can g
 
 # A first sketch of a bitemporal UML model for insurance contracts
 
-![UML Model](https://github.com/michaelfliegner/LifeInsuranceDataModel.jl/blob/main/docs/src/assets/LifeInsuranceDataModel.png)
+![UML Model](https://raw.githubusercontent.com/michaelfliegner/LifeInsuranceDataModel.jl/main/docs/src/assets/LifeInsuranceDataModel.png)
 
 Please compare:
 https://hdombrovskaya.wordpress.com/2019/07/14/lets-go-bitemporal/
