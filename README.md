@@ -1,8 +1,8 @@
-[![CI](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/CI.yml)
+[![CI](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/CI.yml)
 
-[![Documentation](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/Documentation.yml/badge.svg)](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/Documentation.yml)
+[![Documentation](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/Documentation.yml/badge.svg)](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/Documentation.yml)
 
-[![pages-build-deployment](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/michaelfliegner/BitemporalPostgres.jl/actions/workflows/pages/pages-build-deployment)
+[![pages-build-deployment](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/pages/pages-build-deployment)
 
 [![pkgeval](https://juliahub.com/docs/BitemporalPostgres/pkgeval.svg)](https://juliahub.com/ui/Packages/BitemporalPostgres/ZmypI) Testing on Juliahub fails as PkgEval is not applicable because tests require a running POSTGRES server.
 
@@ -10,9 +10,9 @@
 # BitemporalPostgres provides an API for application based bitemporal, that is: audit proof,  transactions with Julia and Postgres DB. Transactions are "long", with persistent transaction data that is, so they can serve as a basis of workflow management: they can be suspended, resumed and delegated.
 
 Documentation
-[here](https://michaelfliegner.github.io/BitemporalPostgres.jl/dev/)
+[here](https://actuarial-sciences-for-africa-asa.github.io/BitemporalPostgres.jl/dev/)
 
-A web app using this module for persistence is being built at https://github.com/michaelfliegner/BitemporalReactive.jl
+A web app using this module for persistence is being built at https://github.com/actuarial-sciences-for-africa-asa/BitemporalReactive.jl
 
 
 ## This project is a [Julia](https://julialang.org/) template configured for ephemeral development environments on [Gitpod](https://www.gitpod.io/). 
