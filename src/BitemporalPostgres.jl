@@ -647,7 +647,7 @@ function mkforest(history::DbId)::Vector{BitemporalPostgres.Node}
       and m.tsdb_validfrom = s.tsdb_invalidfrom
       and tstzrange(m.tsworld_validfrom, m.tsworld_invalidfrom) @> s.tsworld_validfrom
       where m.ref_history=$(history)
-      order by m.id")
+      order by m.id, s.id desc")
 
     treeDict = Dict{Integer,Vector{Integer}}()
 
