@@ -10,9 +10,9 @@ w1 = Workflow()
 w1.tsw_validfrom = ZonedDateTime(2014, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo")
 SearchLight.Configuration.load() |> SearchLight.connect
 t = TestDummyComponent()
-tr = TestDummyComponentRevision(description = "blue")
-ts = TestDummySubComponent(ref_super = t.id)
-tsr = TestDummySubComponentRevision(description = "green")
+tr = TestDummyComponentRevision(description="blue")
+ts = TestDummySubComponent(ref_super=t.id)
+tsr = TestDummySubComponentRevision(description="green")
 create_entity!(w1)
 create_component!(t, tr, w1)
 println(tr)
@@ -34,8 +34,8 @@ end
 workflow w2 yellow rectangle overlaps blue one
 =#
 w2 = Workflow(
-    ref_history = w1.ref_history,
-    tsw_validfrom = ZonedDateTime(2015, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+    ref_history=w1.ref_history,
+    tsw_validfrom=ZonedDateTime(2015, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
 )
 tr2 = copy(tr)
 tr2.description = "yellow"
@@ -57,8 +57,8 @@ end
 workflow w3 red rectangle shadows red and overlaps blue one
 =#
 w3 = Workflow(
-    ref_history = w1.ref_history,
-    tsw_validfrom = ZonedDateTime(2014, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+    ref_history=w1.ref_history,
+    tsw_validfrom=ZonedDateTime(2014, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
 )
 tr3 = copy(tr2)
 tr3.description = "red"
@@ -121,13 +121,13 @@ Testing reading
 end
 
 w4 = Workflow(
-    ref_history = w1.ref_history,
-    tsw_validfrom = ZonedDateTime(2017, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+    ref_history=w1.ref_history,
+    tsw_validfrom=ZonedDateTime(2017, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
 )
 tr4 = copy(tr3)
 tr4.description = "green"
 t1 = TestDummyComponent()
-tr5 = TestDummyComponentRevision(description = "pink")
+tr5 = TestDummyComponentRevision(description="pink")
 
 # @test tr3.ref_invalidfrom==MaxVersion
 
@@ -172,7 +172,7 @@ end
 
 @testset "mkforest" begin
     hforest =
-        mkforest(DbId(1), MaxDate, ZonedDateTime(1900, 1, 1, 0, 0, 0, 0, tz"UTC"), MaxDate)
+        mkforest(DbId(1))
     print_tree(hforest)
     @test hforest[1].interval.ref_version.value == 3
     @test hforest[1].shadowed[1].interval.ref_version.value == 2
