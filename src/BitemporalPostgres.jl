@@ -629,7 +629,7 @@ mkforest(hid::DbId)::Vector{Node}
     see: Theory: Textual representation of mutation histories
 
 """
-function mkForest(history::Integer)::Vector{BitemporalPostgres.Node}
+function mkforest(history::Integer)::Vector{BitemporalPostgres.Node}
     vids = SearchLight.query("
     select vi.ref_version, min(vi.id) from validityintervals vi
     where vi.ref_history=$(history)
