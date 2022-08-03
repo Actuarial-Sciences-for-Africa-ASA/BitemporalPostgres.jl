@@ -270,8 +270,8 @@ TestDummyComponentRevision <: ComponentRevision
 end
 
 Base.copy(src::TestDummyComponentRevision) = TestDummyComponentRevision(
-    ref_component = src.ref_component,
-    description = src.description,
+    ref_component=src.ref_component,
+    description=src.description,
 )
 
 """
@@ -310,8 +310,8 @@ TestDummySubComponentRevision <: ComponentRevision
 end
 
 Base.copy(src::TestDummySubComponentRevision) = TestDummySubComponentRevision(
-    ref_component = src.ref_component,
-    description = src.description,
+    ref_component=src.ref_component,
+    description=src.description,
 )
 """
 findversion(ref_history::DbId, tsdb::ZonedDateTime, tsw::ZonedDateTime)::DbId
@@ -359,7 +359,7 @@ function create_entity!(w::Workflow)
     transaction() do
         h = History()
         save!(h)
-        v = Version(ref_history = h.id)
+        v = Version(ref_history=h.id)
 
         save!(v)
 
@@ -368,12 +368,12 @@ function create_entity!(w::Workflow)
         save!(w)
 
         i = ValidityInterval(
-            ref_history = h.id,
-            ref_version = v.id,
-            tsworld_validfrom = w.tsw_validfrom,
-            tsworld_invalidfrom = MaxDate,
-            tsdb_validfrom = now(tz"Africa/Porto-Novo"),
-            tsdb_invalidfrom = MaxDate,
+            ref_history=h.id,
+            ref_version=v.id,
+            tsworld_validfrom=w.tsw_validfrom,
+            tsworld_invalidfrom=MaxDate,
+            tsdb_validfrom=now(tz"Africa/Porto-Novo"),
+            tsdb_invalidfrom=MaxDate,
         )
         save!(i)
     end
@@ -435,18 +435,18 @@ update_entity!(w::Workflow)
 function update_entity!(w::Workflow)
     transaction() do
         hid = w.ref_history
-        v = Version(ref_history = hid)
+        v = Version(ref_history=hid)
         save!(v)
         w.ref_version = v.id
         save!(w)
 
         i = ValidityInterval(
-            ref_history = hid,
-            ref_version = v.id,
-            tsworld_validfrom = w.tsw_validfrom,
-            tsworld_invalidfrom = MaxDate,
-            tsdb_validfrom = now(tz"Africa/Porto-Novo"),
-            tsdb_invalidfrom = MaxDate,
+            ref_history=hid,
+            ref_version=v.id,
+            tsworld_validfrom=w.tsw_validfrom,
+            tsworld_invalidfrom=MaxDate,
+            tsdb_validfrom=now(tz"Africa/Porto-Novo"),
+            tsdb_invalidfrom=MaxDate,
         )
         save!(i)
     end
@@ -546,13 +546,13 @@ function commit_workflow!(w::Workflow)
         for i in overlapped
             i.tsdb_invalidfrom = w.tsdb_validfrom
             j = ValidityInterval(
-                ref_history = i.ref_history,
-                ref_version = i.ref_version,
-                tsworld_validfrom = i.tsworld_validfrom,
-                tsworld_invalidfrom = uncommitted[1].tsworld_validfrom,
-                tsdb_validfrom = w.tsdb_validfrom,
-                tsdb_invalidfrom = MaxDate,
-                is_committed = 1,
+                ref_history=i.ref_history,
+                ref_version=i.ref_version,
+                tsworld_validfrom=i.tsworld_validfrom,
+                tsworld_invalidfrom=uncommitted[1].tsworld_validfrom,
+                tsdb_validfrom=w.tsdb_validfrom,
+                tsdb_invalidfrom=MaxDate,
+                is_committed=1,
             )
             save!(i)
             save!(j)
@@ -599,39 +599,73 @@ printnode(io::IO, n::Node) =
     print(io, n.interval.ref_history.value * n.interval.ref_version.value)
 
 """
-mkforest(hid::DbId,tsdb_invalidfrom::ZonedDateTime,tsworld_validfrom::ZonedDateTime,tsworld_invalidfrom::ZonedDateTime,)::Vector{Node}
+mkforest(hid::DbId)::Vector{Node}
 
-    builds a tree of vectors of version nodes where
+    builds a tree of versipon nodes with child node vectors denoting
+    mutations which have been retrospectively corrected by their parent = predecessor
+    
+    see: Theory: Textual representation of mutation histories
 
-    * nodes in one vector denote conecutive mutations and
-    * child node vectors denote mutations which have been retrospectively corrected by their predecessor
+"""
+function mkTree(history::Integer, version::Integer, vidsDict::Dict{Integer,Integer}, treeDict::Dict{Integer,Vector{Integer}})::BitemporalPostgres.Node
+    interval = find(ValidityInterval, SQLWhereExpression("id=?", DbId(vidsDict[version])))[1]
+    shadowed = if (haskey(treeDict, version))
+        map(treeDict[version]) do shdw
+            mkTree(history, shdw, vidsDict, treeDict)
+        end
+    else
+        []
+    end
+    Node(interval, shadowed)
+end
+
+"""
+mkforest(hid::DbId)::Vector{Node}
+
+    builds a forest of version nodes where
+    * eventual child node vectors denote mutations which have been retrospectively corrected by their predecessor
     
 
     see: Theory: Textual representation of mutation histories
 
 """
-function mkforest(
-    hid::DbId,
-    tsdb_invalidfrom::ZonedDateTime,
-    tsworld_validfrom::ZonedDateTime,
-    tsworld_invalidfrom::ZonedDateTime,
-)::Vector{Node}
-    map(
-        i::ValidityInterval -> Node(
-            i,
-            mkforest(hid, i.tsdb_validfrom, i.tsworld_validfrom, i.tsworld_invalidfrom),
-        ),
-        find(
-            ValidityInterval,
-            SQLWhereExpression(
-                "ref_history=? AND  upper(tsrdb)=? AND tstzrange(?,?) * tsrworld = tsrworld",
-                hid,
-                tsdb_invalidfrom,
-                tsworld_validfrom,
-                tsworld_invalidfrom,
-            ),
-        ),
-    )
+function mkForest(history::Integer)::Vector{BitemporalPostgres.Node}
+    vids = SearchLight.query("
+    select vi.ref_version, min(vi.id) from validityintervals vi
+    where vi.ref_history=$(history)
+    group by vi.ref_version")
+
+    vidsDict = Dict{Integer,Integer}()
+
+    for i = 1:size(vids)[1]
+        vidsDict[vids[i, 1]] = vids[i, 2]
+    end
+
+    tree = SearchLight.query("select m.ref_version mv, s.ref_version as sv from validityintervals m join validityintervals s 
+      on m.ref_history = s.ref_history
+      and m.ref_version != s.ref_version
+      and m.tsdb_validfrom = s.tsdb_invalidfrom
+      and tstzrange(m.tsworld_validfrom, m.tsworld_invalidfrom) @> s.tsworld_validfrom
+      where m.ref_history=$(history)
+      order by m.id")
+
+    treeDict = Dict{Integer,Vector{Integer}}()
+
+    for i = 1:size(tree)[1]
+        key = tree[i, 1]
+        treeDict[key] = if (haskey(treeDict, key))
+            append(treeDict[key], [tree[i, 2]])
+        else
+            treeDict[key] = [tree[i, 2]]
+        end
+    end
+
+    valids = find(ValidityInterval, SQLWhereExpression("ref_history=? and tsdb_invalidfrom=?", DbId(h), MaxDate),
+        order=SQLOrder("ref_version", "<"))
+
+    map(valids) do vi
+        mkTree(history, vi.ref_version.value, vidsDict, treeDict)
+    end
 end
 
 end # module
