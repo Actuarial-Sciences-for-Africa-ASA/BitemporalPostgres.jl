@@ -661,7 +661,7 @@ function mkforest(history::DbId)::Vector{BitemporalPostgres.Node}
     end
 
     valids = find(ValidityInterval, SQLWhereExpression("ref_history=? and tsdb_invalidfrom=?", DbId(history), MaxDate),
-        order=SQLOrder("ref_version", "<"))
+        order=SQLOrder("ref_version", "DESC"))
 
     map(valids) do vi
         mktree(vi.ref_version.value, vidsDict, treeDict)
