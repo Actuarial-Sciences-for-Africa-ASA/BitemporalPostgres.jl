@@ -4,7 +4,7 @@ dev:
   adapter: PostgreSQL
   database: postgres
   host: 127.0.0.1
-  username: gitpod
+  username: postgres
   password:
   port: 5432
   config:

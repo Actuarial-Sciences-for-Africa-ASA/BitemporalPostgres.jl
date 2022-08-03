@@ -599,7 +599,7 @@ printnode(io::IO, n::Node) =
     print(io, n.interval.ref_history.value * n.interval.ref_version.value)
 
 """
-function mktree(history::Integer, version::Integer, vidsDict::Dict{Integer,Integer}, treeDict::Dict{Integer,Vector{Integer}})::BitemporalPostgres.Node
+function mktree(version::Integer, vidsDict::Dict{Integer,Integer}, treeDict::Dict{Integer,Vector{Integer}})::BitemporalPostgres.Node
  
     builds a tree of versipon nodes with child node vectors denoting
     mutations which have been retrospectively corrected by their parent = predecessor
@@ -664,7 +664,7 @@ function mkforest(history::DbId)::Vector{BitemporalPostgres.Node}
         order=SQLOrder("ref_version", "<"))
 
     map(valids) do vi
-        mkTree(vi.ref_version.value, vidsDict, treeDict)
+        mktree(vi.ref_version.value, vidsDict, treeDict)
     end
 end
 
