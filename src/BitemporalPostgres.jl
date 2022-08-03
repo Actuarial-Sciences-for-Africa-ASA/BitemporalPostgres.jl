@@ -660,7 +660,7 @@ function mkforest(history::DbId)::Vector{BitemporalPostgres.Node}
         end
     end
 
-    valids = find(ValidityInterval, SQLWhereExpression("ref_history=? and tsdb_invalidfrom=?", DbId(h), MaxDate),
+    valids = find(ValidityInterval, SQLWhereExpression("ref_history=? and tsdb_invalidfrom=?", DbId(history), MaxDate),
         order=SQLOrder("ref_version", "<"))
 
     map(valids) do vi
