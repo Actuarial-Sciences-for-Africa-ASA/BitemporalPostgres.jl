@@ -28,6 +28,11 @@ export History,
     Workflow,
     findversion,
     findcomponentrevision,
+    get_revision,
+    get_revisionIfAny,
+    VersionException,
+    NoVersionFound,
+    TooManyVersionsFound,
     create_entity!,
     create_component!,
     create_subcomponent!,
@@ -346,6 +351,155 @@ function findcomponentrevision(
             ref_version,
         ),
     )
+end
+
+"""
+VersionException
+
+    thrown on versioning errors
+"""
+abstract type VersionException end
+
+"""
+NoVersionFound
+    showing component type, id and version id
+
+"""
+@kwdef mutable struct NoVersionFound <: VersionException
+    type::Type{Any} = Any
+    cid::Integer = 0
+    vid::Integer = 0
+end
+
+"""
+TooManyVersionsFound
+    showing component type, id and version id
+    indicates an error in committing of versions
+"""
+@kwdef mutable struct TooManyVersionsFound <: VersionException
+    type::Type{Any} = Any
+    cid::Integer = 0
+    vid::Integer = 0
+end
+
+"""
+get_revision(ctype::Type{CT}, rtype::Type{RT}, hid::DbId, vid::DbId) where {CT<:Component,RT<:ComponentRevision}
+
+    retrieves the revision of the unique component of type CT in history hid as of version vid 
+    the revision must exist
+"""
+function get_revision(
+    ctype::Type{CT},
+    rtype::Type{RT},
+    hid::DbId,
+    vid::DbId,
+) where {CT<:Component,RT<:ComponentRevision}
+    let cid = find(ctype, SQLWhereExpression("ref_history=?", hid))[1].id,
+        res = find(
+            rtype,
+            SQLWhereExpression(
+                "ref_component=? and ref_valid  @> BIGINT ?",
+                cid,
+                vid,
+            ),
+        )
+
+        if (length(res) == 1)
+            res[1]
+        elseif (length(res) == 0)
+            throw(NoVersionFound(rtype, cid, vid))
+        else
+            throw(TooManyVersionsFound(rtype, cid, vid))
+        end
+    end
+end
+
+"""
+get_revision(rtype::Type{RT}, hid::DbId, vid::DbId) where {RT<:ComponentRevision}
+
+    retrieves the revision of component cid as of version vid 
+    the revision must exist
+"""
+function get_revision(
+    rtype::Type{RT},
+    cid::DbId,
+    vid::DbId,
+) where {RT<:ComponentRevision}
+    let res = find(
+            rtype,
+            SQLWhereExpression(
+                "ref_component=? and ref_valid  @> BIGINT ?",
+                cid,
+                vid
+            ),
+        )
+        if (length(res) == 1)
+            res[1]
+        elseif (length(res) == 0)
+            throw(NoVersionFound(rtype, cid, vid))
+        else
+            throw(TooManyVersionsFound(rtype, cid, vid))
+        end
+    end
+end
+
+"""
+function get_revisionIfAny( ctype::Type{CT}, rtype::Type{RT}, hid::DbId, vid::DbId, )::Vector{RT} where {CT<:Component,RT<:ComponentRevision}
+    retrieves the revision of the unique component of type CT in history hid if one exists as of version vid 
+    
+    An optional (unique) component may have a revision for a version later as vid. In such cases a component w/o valid revision is itself valid, just to be ignored for the current version.
+
+"""
+function get_revisionIfAny(
+    ctype::Type{CT},
+    rtype::Type{RT},
+    hid::DbId,
+    vid::DbId,
+)::Vector{RT} where {CT<:Component,RT<:ComponentRevision}
+    let cid = find(ctype, SQLWhereExpression("ref_history=?", hid))[1].id,
+        res = find(
+            rtype,
+            SQLWhereExpression(
+                "ref_component=? and ref_valid  @> BIGINT ?",
+                cid,
+                vid,
+            ),
+        )
+
+        if (length(res) < 2)
+            res
+        else
+            throw(TooManyVersionsFound(rtype, cid, vid))
+        end
+    end
+end
+
+"""
+function get_revisionIfAny(rtype::Type{RT}, hid::DbId, vid::DbId, )::Vector{RT} where {RT<:ComponentRevision}
+    retrieves the revision of the unique component of type CT in history hid if one exists as of version vid 
+    
+    An optional component may have a revision for a version later as vid. In such cases a component w/o valid revision is itself valid, just to be ignored for the current version.
+
+"""
+function get_revisionIfAny(
+    rtype::Type{RT},
+    cid::DbId,
+    vid::DbId,
+)::Vector{RT} where {RT<:ComponentRevision}
+    let res = find(
+            rtype,
+            SQLWhereExpression(
+                "ref_component=? and ref_valid  @> BIGINT ?",
+                cid,
+                vid
+            ),
+        )
+        if (length(res) < 2)
+            res
+        else
+            throw(TooManyVersionsFound(rtype, cid, vid))
+        end
+    end
 end
 
 """
