@@ -1,9 +1,9 @@
-using SearchLight,SearchLightPostgreSQL,TimeZones
+using SearchLight, SearchLightPostgreSQL, TimeZones
 
 SearchLight.connect(SearchLight.Configuration.load())
 SearchLight.Migrations.create_migrations_table()
-SearchLight.Migrations.up()
 using BitemporalPostgres, Dates, SearchLight, Test, TimeZones
+BitemporalPostgres.up()
 #=workflow w1 blue rectangle 
 =#
 w1 = Workflow()

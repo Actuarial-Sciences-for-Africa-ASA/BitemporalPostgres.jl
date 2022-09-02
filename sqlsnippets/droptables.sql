@@ -13,3 +13,5 @@ drop table versions;
 drop table histories;
 
 drop table testtstzranges;
+drop function f_versionrange;
+drop function f_bitempranges;
