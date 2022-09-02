@@ -1,6 +1,6 @@
-using SearchLight
-using SearchLightPostgreSQL
-SearchLight.Configuration.load() |> SearchLight.connect
+using SearchLight,SearchLightPostgreSQL,TimeZones
+
+SearchLight.connect(SearchLight.Configuration.load())
 SearchLight.Migrations.create_migrations_table()
 SearchLight.Migrations.up()
 using BitemporalPostgres, Dates, SearchLight, Test, TimeZones
@@ -8,7 +8,7 @@ using BitemporalPostgres, Dates, SearchLight, Test, TimeZones
 =#
 w1 = Workflow()
 w1.tsw_validfrom = ZonedDateTime(2014, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo")
-SearchLight.Configuration.load() |> SearchLight.connect
+SearchLight.connect(SearchLight.Configuration.load())
 t = TestDummyComponent()
 tr = TestDummyComponentRevision(description="blue")
 ts = TestDummySubComponent(ref_super=t.id)

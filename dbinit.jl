@@ -1,6 +1,6 @@
 run(`psql -f sqlsnippets/droptables.sql`)
 using SearchLight
 using SearchLightPostgreSQL
-SearchLight.Configuration.load() |> SearchLight.connect
+SearchLight.connect(SearchLight.Configuration.load())
 SearchLight.Migrations.create_migrations_table()
 SearchLight.Migrations.up()
