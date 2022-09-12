@@ -319,17 +319,18 @@ Base.copy(src::TestDummySubComponentRevision) = TestDummySubComponentRevision(
     description=src.description,
 )
 """
-findversion(ref_history::DbId, tsdb::ZonedDateTime, tsw::ZonedDateTime)::DbId
+findversion(ref_history::DbId, tsdb::ZonedDateTime, tsw::ZonedDateTime, committed::Integer=1)::DbId
        retrieves the version_id of a bitemporal history asof tsdb as per tsw
 """
-function findversion(ref_history::DbId, tsdb::ZonedDateTime, tsw::ZonedDateTime)::DbId
+function findversion(ref_history::DbId, tsdb::ZonedDateTime, tsw::ZonedDateTime, committed::Integer=1)::DbId
     find(
         ValidityInterval,
         SQLWhereExpression(
-            "ref_history=? and tsrworld @> TIMESTAMPTZ ? AND tsrdb @> TIMESTAMPTZ ?",
+            "ref_history=? and tsrworld @> TIMESTAMPTZ ? AND tsrdb @> TIMESTAMPTZ ? AND is_committed = ?",
             ref_history,
             SQLInput(tsw),
             SQLInput(tsdb),
+            committed
         ),
     )[1].ref_version
 end
