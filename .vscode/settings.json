@@ -15,7 +15,7 @@
     "terminal.integrated.commandsToSkipShell": [
         "language-julia.interrupt"
     ],
-    "julia.executablePath": "/home/gitpod/julia/bin/julia",
+    "julia.executablePath": "~/julia-1.8.0/bin/julia",
     "julia.symbolCacheDownload": true,
     "julia.enableTelemetry": true,
     "settingsSync.ignoredExtensions": [
@@ -38,5 +38,6 @@
             "database": "postgres",
             "username": "gitpod"
         }
-    ]
+    ],
+    "julia.NumThreads": 0
 }

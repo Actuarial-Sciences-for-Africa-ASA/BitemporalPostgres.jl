@@ -19,6 +19,7 @@ export History,
     get_typeof_revision,
     SubComponent,
     ComponentRevision,
+    revisionTypes,
     ValidityInterval,
     TestDummyComponent,
     TestDummyComponentRevision,
@@ -87,6 +88,7 @@ end
     tsdb_validfrom::ZonedDateTime = MaxDate
     tsw_validfrom::ZonedDateTime = MaxDate
     is_committed::Integer = 0
+    type_of_entity::Symbol = :Undefined
 end
 
 @kwdef mutable struct Testtstzrange <: AbstractModel
@@ -578,6 +580,15 @@ function create_subcomponent!(
 end
 
 """
+revisionTypes(entity::Val{T})::Vector{T} where {T<:Symbol}
+    list of subtypes of ComponentRevision that are subcomponents
+    of 
+"""
+function revisionTypes(entity::Val{T})::Vector{T} where {T<:Symbol}
+end
+
+
+"""
 update_entity!(w::Workflow)
 * opens a bitemporal transaction identified by ref_version
 * persists a version, a validityInterval and a Workflow 
@@ -592,7 +603,8 @@ function update_entity!(w::Workflow)
         hid = w.ref_history
         v = Version(ref_history=hid)
         save!(v)
-        w.ref_version = v.id
+        active_version = v.id
+        w.ref_version = active_version
         save!(w)
 
         i = ValidityInterval(
@@ -604,6 +616,32 @@ function update_entity!(w::Workflow)
             tsdb_invalidfrom=MaxDate,
         )
         save!(i)
+        shadowed_versions = map(
+            find(
+                ValidityInterval,
+                SQLWhereExpression(
+                    "ref_history = ?  AND tsrdb @> TIMESTAMPTZ ? AND tsrworld <@ tstzrange(?,?) AND is_committed=1",
+                    w.ref_version,
+                    MaxDate - Dates.Day(1),
+                    w.tsw_validfrom,
+                    MaxDate,
+                ))) do shadowed
+            shadowed.ref_version
+        end
+
+        map(subtypes(BitemporalPostgres.ComponentRevision)) do st
+            map(shadowed_versions) do v
+                found = find(st, SQLWhereExpression("ref_validfrom = ? and ref_invalidfrom=?", v, MaxVersion))
+                if (!isempty(found))
+                    map(found) do toTerminate
+                        toTerminate.ref_invalidfrom = DbId(active_version)
+                        save!(toTerminate)
+                    end
+                    found
+                end
+                found
+            end
+        end
     end
 end
 

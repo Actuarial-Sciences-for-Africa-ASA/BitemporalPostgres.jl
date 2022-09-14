@@ -2,6 +2,6 @@
     "recommendations": [
         "mtxr.sqltools-driver-pg",
         "mtxr.sqltools",
-        "singularitti.vscode-julia-formatter"
+        "julialang.language-julia"
     ]
 }
