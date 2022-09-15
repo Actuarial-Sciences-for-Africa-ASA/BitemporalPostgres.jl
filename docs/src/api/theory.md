@@ -169,18 +169,20 @@ Transactions here are application based. A transaction is identified by a versio
 ```math
 \hspace*{10mm} validity = [now,∞) [w,∞)
 ```
+* with retrospective transactions all revisions valid from now shadowed versions are marked as invalid from the new version
 
 **Mutations of components** consist of
 
 * new revisions of components that are marked as valid from the new version on and invalid from infinity on and
 * previous revisions of mutated or deleted components that are marked as invalid from the new version on.
 
+
 **Backing out** of a bitemporal transaction consists of
 
 * deleting the version instance and its depending data:
   * the uncommitted interval
   * new revisions of components, which are marked as valid from the backed out version on and
-  * resetting the "invalid from" marks of mutated revisions back to infinity(MaxVersion)
+  * resetting the "invalid from" marks of mutated and shadowed revisions back to infinity(MaxVersion)
 
 **Committing**  a version consists of
 
