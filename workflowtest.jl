@@ -6,8 +6,10 @@ using BitemporalPostgres, Dates, SearchLight, Test, TimeZones
 BitemporalPostgres.up()
 #=workflow w1 blue rectangle 
 =#
+
 w1 = Workflow()
 w1.tsw_validfrom = ZonedDateTime(2014, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo")
+w1.type_of_entity = "TestDummyComponent"
 SearchLight.connect(SearchLight.Configuration.load())
 t = TestDummyComponent()
 tr = TestDummyComponentRevision(description="blue")
@@ -36,6 +38,7 @@ workflow w2 yellow rectangle overlaps blue one
 w2 = Workflow(
     ref_history=w1.ref_history,
     tsw_validfrom=ZonedDateTime(2015, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+    type_of_entity="TestDummyComponent"
 )
 tr2 = copy(tr)
 tr2.description = "yellow"
@@ -59,6 +62,7 @@ workflow w3 red rectangle shadows red and overlaps blue one
 w3 = Workflow(
     ref_history=w1.ref_history,
     tsw_validfrom=ZonedDateTime(2014, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+    type_of_entity="TestDummyComponent"
 )
 tr3 = copy(tr2)
 tr3.description = "red"
@@ -123,6 +127,7 @@ end
 w4 = Workflow(
     ref_history=w1.ref_history,
     tsw_validfrom=ZonedDateTime(2017, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+    type_of_entity="TestDummyComponent"
 )
 tr4 = copy(tr3)
 tr4.description = "green"

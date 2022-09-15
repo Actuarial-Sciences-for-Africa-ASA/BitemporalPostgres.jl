@@ -587,6 +587,14 @@ revisionTypes(entity::Val{T})::Vector{T} where {T<:Symbol}
 function revisionTypes(entity::Val{T})::Vector{T} where {T<:Symbol}
 end
 
+"""
+revisionTypes(entity::Val{:TestDummyComponent}) 
+  defining the ComponentRevision types occurring in TestDummyComponents
+"""
+revisionTypes(entity::Val{:TestDummyComponent}) = [TestDummyComponentRevision,
+    TestDummySubComponentRevision
+]
+
 
 """
 update_entity!(w::Workflow)
@@ -629,7 +637,7 @@ function update_entity!(w::Workflow)
             shadowed.ref_version
         end
 
-        map(subtypes(BitemporalPostgres.ComponentRevision)) do st
+        map(revisionTypes(Symbol(w.type_of_entity))) do st
             map(shadowed_versions) do v
                 found = find(st, SQLWhereExpression("ref_validfrom = ? and ref_invalidfrom=?", v, MaxVersion))
                 if (!isempty(found))
