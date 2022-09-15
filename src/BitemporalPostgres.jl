@@ -637,7 +637,7 @@ function update_entity!(w::Workflow)
             shadowed.ref_version
         end
 
-        map(revisionTypes(Symbol(w.type_of_entity))) do st
+        map(revisionTypes(Val(Symbol(w.type_of_entity)))) do st
             map(shadowed_versions) do v
                 found = find(st, SQLWhereExpression("ref_validfrom = ? and ref_invalidfrom=?", v, MaxVersion))
                 if (!isempty(found))
