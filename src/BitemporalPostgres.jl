@@ -88,7 +88,7 @@ end
     tsdb_validfrom::ZonedDateTime = MaxDate
     tsw_validfrom::ZonedDateTime = MaxDate
     is_committed::Integer = 0
-    type_of_entity::Symbol = ""
+    type_of_entity::String = ""
 end
 
 @kwdef mutable struct Testtstzrange <: AbstractModel
