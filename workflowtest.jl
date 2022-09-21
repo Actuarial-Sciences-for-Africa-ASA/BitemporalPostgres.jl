@@ -4,6 +4,14 @@ SearchLight.connect(SearchLight.Configuration.load())
 SearchLight.Migrations.create_migrations_table()
 using BitemporalPostgres, Dates, SearchLight, Test, TimeZones
 BitemporalPostgres.up()
+
+#=
+red     w1 2014,  5, 30
+yellow  w2 2015,  5, 30, 
+red     w3 2014, 11, 30 rectangle shadows red and overlaps blue one
+
+=#
+
 #=workflow w1 blue rectangle 
 =#
 
@@ -45,7 +53,7 @@ tr2.description = "yellow"
 update_entity!(w2)
 update_component!(tr, tr2, w2)
 println(tr2)
-@testset "update entity" begin
+@testset "update entity yellow" begin
     @test w2.ref_version == tr2.ref_validfrom
     @test w2.ref_version == tr.ref_invalidfrom
 end
@@ -53,7 +61,7 @@ end
 committing w2 yellow rectangle
 =#
 commit_workflow!(w2)
-@testset "commit update entity" begin
+@testset "commit update entity yellow" begin
     @test w2.is_committed == 1
 end
 #=
@@ -64,15 +72,23 @@ w3 = Workflow(
     tsw_validfrom=ZonedDateTime(2014, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
     type_of_entity="TestDummyComponent"
 )
-tr3 = copy(tr2)
-tr3.description = "red"
 update_entity!(w3)
-update_component!(tr2, tr3, w3)
+@testset "retrospective update entity red revive and invalidate shadowed " begin
+    @test !isempty(find(TestDummyComponentRevision, SQLWhereExpression("ref_validfrom=?", w3.ref_version)))
+    @test !isempty(find(TestDummyComponentRevision, SQLWhereExpression("ref_invalidfrom=?", w3.ref_version)))
+end
+
+tr2 = find(TestDummyComponentRevision, SQLWhereExpression("ref_invalidfrom=?", w3.ref_version))[1]
+tr3 = find(TestDummyComponentRevision, SQLWhereExpression("ref_validfrom=?", w3.ref_version))[1]
+tr4 = copy(tr3)
+tr4.description = "red"
+update_component!(tr3, tr4, w3)
+
 delete_component!(ts, w3)
 tsr = find(TestDummySubComponentRevision, SQLWhereExpression("id=?", 1))[1]
 println(tr3)
-@testset "retrospective update entity " begin
-    @test w3.ref_version == tr3.ref_validfrom
+@testset "retrospective update entity red " begin
+    @test w3.ref_version == tr4.ref_validfrom
     @test w3.ref_version == tr2.ref_invalidfrom
     @test w3.ref_version == tsr.ref_invalidfrom
 end

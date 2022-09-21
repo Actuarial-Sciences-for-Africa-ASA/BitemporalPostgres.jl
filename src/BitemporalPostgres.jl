@@ -600,6 +600,9 @@ revisionTypes(entity::Val{:TestDummyComponent}) = [TestDummyComponentRevision,
 update_entity!(w::Workflow)
 * opens a bitemporal transaction identified by ref_version
 * persists a version, a validityInterval and a Workflow 
+* For retrospective transactions
+    * preliminarily invalidates all insertions and mutations from shadowed versions
+    * preliminarily revives all revisions invalidated by shadowed versions
 * requires:
     * w.tsw_validfrom is a valid date
     * w.ref_history is a valid history id
@@ -629,21 +632,50 @@ function update_entity!(w::Workflow)
                 ValidityInterval,
                 SQLWhereExpression(
                     "ref_history = ?  AND tsrdb @> TIMESTAMPTZ ? AND tsrworld <@ tstzrange(?,?) AND is_committed=1",
-                    w.ref_version,
+                    hid,
                     MaxDate - Dates.Day(1),
                     w.tsw_validfrom,
-                    MaxDate,
-                ))) do shadowed
+                    MaxDate),
+                order=SQLOrder("ref_version", "ASC")
+            )) do shadowed
             shadowed.ref_version
         end
+        println("++++++++++++++++++++++++++++++++++++++++++++++")
+        println("shadowed")
+        println(shadowed_versions)
+        println("++++++++++++++++++++++++++++++++++++++++++++++")
 
         map(revisionTypes(Val(Symbol(w.type_of_entity)))) do st
+            # Preliminarily invalidating all insertions and mutations from shadowed versions
             map(shadowed_versions) do v
                 found = find(st, SQLWhereExpression("ref_validfrom = ? and ref_invalidfrom=?", v, MaxVersion))
                 if (!isempty(found))
                     map(found) do toTerminate
                         toTerminate.ref_invalidfrom = DbId(active_version)
                         save!(toTerminate)
+                        println("++++++++++++++++++++++++++++++++++++++++++++++")
+                        println("toTerminate" * string(toTerminate))
+                        println("++++++++++++++++++++++++++++++++++++++++++++++")
+
+                    end
+                    found
+                end
+                found
+            end
+            # Preliminarily reviving all revisions invalidated by shadowed versions
+            map(shadowed_versions) do v
+                found = find(st, SQLWhereExpression("ref_validfrom < ? and ref_invalidfrom=?", shadowed_versions[1], v))
+                if (!isempty(found))
+                    map(found) do toCopy
+                        let revived = copy(toCopy)
+                            revived.id = DbId()
+                            revived.ref_validfrom = active_version
+                            revived.ref_invalidfrom = MaxVersion
+                            println("++++++++++++++++++++++++++++++++++++++++++++++")
+                            println("to revive" * string(revived))
+                            println("++++++++++++++++++++++++++++++++++++++++++++++")
+                            save!(revived)
+                        end
                     end
                     found
                 end
@@ -663,11 +695,14 @@ terminates a componentRevision and persists its successor
 function update_component!(cr::ComponentRevision, crNew::ComponentRevision, w::Workflow)
     transaction() do
         vid = w.ref_version
-        setref_invalidfrom(cr, vid)
-        save!(cr)
-
-        setref_validfrom(crNew, vid)
-        save!(crNew)
+        if (crNew.ref_validfrom == vid)
+            save!(crNew)
+        else
+            setref_invalidfrom(cr, vid)
+            setref_validfrom(crNew, vid)
+            crNew.id = DbId()
+            save!(crNew)
+        end
     end
 end
 
