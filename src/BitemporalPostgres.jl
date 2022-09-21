@@ -699,6 +699,7 @@ function update_component!(cr::ComponentRevision, crNew::ComponentRevision, w::W
             save!(crNew)
         else
             setref_invalidfrom(cr, vid)
+            save!(cr)
             setref_validfrom(crNew, vid)
             crNew.id = DbId()
             save!(crNew)

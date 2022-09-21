@@ -1,202 +1,193 @@
-using SearchLight, SearchLightPostgreSQL, TimeZones
-
+# content
+# Introduction
+# connecting to POSTGRES
+# creating the db schema
+# testing bitemporal crud
+# 1. Introduction
+# If You start this repo in gitpod, You can open this notebook in vscode and execute the code with julia and postgres up and running https://www.gitpod.io/docs/
+# 
+# 1.1. connecting to POSTGRES
+include("init.jl")
+using SearchLight
+using SearchLightPostgreSQL
+# run(`psql -f sqlsnippets/droptables.sql`)
+ENV["SEARCHLIGHT_PASSWORD"] = "jw8s0F49KL"
+ENV["SEARCHLIGHT_USERNAME"] = "bitemporalpostgres"
 SearchLight.connect(SearchLight.Configuration.load())
 SearchLight.Migrations.create_migrations_table()
-using BitemporalPostgres, Dates, SearchLight, Test, TimeZones
 BitemporalPostgres.up()
 
-#=
-red     w1 2014,  5, 30
-yellow  w2 2015,  5, 30, 
-red     w3 2014, 11, 30 rectangle shadows red and overlaps blue one
+# 2 Starting with workflows
+# 2.1 Workflow 1 (the blue rectangle :=) )
+# 2.1.1 Starting workflow 1
+# inserting component 1 and subcomponent 1.1
 
-=#
+using Dates, Test, TimeZones
+import BitemporalPostgres
+using BitemporalPostgres
 
-#=workflow w1 blue rectangle 
-=#
+w1blue = Workflow(type_of_entity="TestDummyComponent",
+    tsw_validfrom=ZonedDateTime(2014, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"))
 
-w1 = Workflow()
-w1.tsw_validfrom = ZonedDateTime(2014, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo")
-w1.type_of_entity = "TestDummyComponent"
-SearchLight.connect(SearchLight.Configuration.load())
-t = TestDummyComponent()
-tr = TestDummyComponentRevision(description="blue")
-ts = TestDummySubComponent(ref_super=t.id)
-tsr = TestDummySubComponentRevision(description="green")
-create_entity!(w1)
-create_component!(t, tr, w1)
-println(tr)
-create_subcomponent!(t, ts, tsr, w1)
-w1.ref_history != Nothing
-@testset "create entity" begin
-    @test w1.is_committed == 0
-    @test w1.ref_version == tr.ref_validfrom
-    @test w1.ref_version == tsr.ref_validfrom
-end
-#=
-committing w1 blue rectangle
-=#
-@testset "commit create entity" begin
-    commit_workflow!(w1)
-    @test w1.is_committed == 1
-end
-#=
-workflow w2 yellow rectangle overlaps blue one
-=#
-w2 = Workflow(
-    ref_history=w1.ref_history,
-    tsw_validfrom=ZonedDateTime(2015, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
-    type_of_entity="TestDummyComponent"
-)
-tr2 = copy(tr)
-tr2.description = "yellow"
-update_entity!(w2)
-update_component!(tr, tr2, w2)
-println(tr2)
-@testset "update entity yellow" begin
-    @test w2.ref_version == tr2.ref_validfrom
-    @test w2.ref_version == tr.ref_invalidfrom
-end
-#=
-committing w2 yellow rectangle
-=#
-commit_workflow!(w2)
-@testset "commit update entity yellow" begin
-    @test w2.is_committed == 1
-end
-#=
-workflow w3 red rectangle shadows red and overlaps blue one
-=#
-w3 = Workflow(
-    ref_history=w1.ref_history,
-    tsw_validfrom=ZonedDateTime(2014, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
-    type_of_entity="TestDummyComponent"
-)
-update_entity!(w3)
-@testset "retrospective update entity red revive and invalidate shadowed " begin
-    @test !isempty(find(TestDummyComponentRevision, SQLWhereExpression("ref_validfrom=?", w3.ref_version)))
-    @test !isempty(find(TestDummyComponentRevision, SQLWhereExpression("ref_invalidfrom=?", w3.ref_version)))
-end
-
-tr2 = find(TestDummyComponentRevision, SQLWhereExpression("ref_invalidfrom=?", w3.ref_version))[1]
-tr3 = find(TestDummyComponentRevision, SQLWhereExpression("ref_validfrom=?", w3.ref_version))[1]
-tr4 = copy(tr3)
-tr4.description = "red"
-update_component!(tr3, tr4, w3)
-
-delete_component!(ts, w3)
-tsr = find(TestDummySubComponentRevision, SQLWhereExpression("id=?", 1))[1]
-println(tr3)
-@testset "retrospective update entity red " begin
-    @test w3.ref_version == tr4.ref_validfrom
-    @test w3.ref_version == tr2.ref_invalidfrom
-    @test w3.ref_version == tsr.ref_invalidfrom
-end
-#= committing w3 red rectangle
-=#
-
-commit_workflow!(w3)
-@testset "commit retrospective update entity " begin
-    @test w3.is_committed == 1
-end
-#=
-Testing reading 
-=#
-@testset "reading tests" begin
-    v1 = findversion(w1.ref_history, w1.tsdb_validfrom, w1.tsw_validfrom)
-
-    @test findcomponentrevision(TestDummyComponentRevision, t.id, v1)[1].description ==
-          "blue"
-    @test findcomponentrevision(TestDummySubComponentRevision, ts.id, v1)[1].description ==
-          "green"
-
-    v2 = findversion(w2.ref_history, w2.tsdb_validfrom, w2.tsw_validfrom)
-
-    @test findcomponentrevision(TestDummyComponentRevision, t.id, v2)[1].description ==
-          "yellow"
-    @test findcomponentrevision(TestDummySubComponentRevision, ts.id, v2)[1].description ==
-          "green"
-
-    v2a = findversion(w2.ref_history, w2.tsdb_validfrom, w2.tsw_validfrom - Dates.Second(1))
-
-    @test findcomponentrevision(TestDummyComponentRevision, t.id, v2a)[1].description ==
-          "blue"
-    @test findcomponentrevision(TestDummySubComponentRevision, ts.id, v2a)[1].description ==
-          "green"
-
-
-    v3 = findversion(w3.ref_history, w3.tsdb_validfrom, w3.tsw_validfrom)
-
-    @test findcomponentrevision(TestDummyComponentRevision, t.id, v3)[1].description ==
-          "red"
-    @test isempty(findcomponentrevision(TestDummySubComponentRevision, ts.id, v3))
-
-    v3a = findversion(w3.ref_history, w3.tsdb_validfrom, w3.tsw_validfrom - Dates.Second(1))
-
-    @test findcomponentrevision(TestDummyComponentRevision, t.id, v3a)[1].description ==
-          "blue"
-    @test findcomponentrevision(TestDummySubComponentRevision, ts.id, v3a)[1].description ==
-          "green"
-
-end
-
-w4 = Workflow(
-    ref_history=w1.ref_history,
-    tsw_validfrom=ZonedDateTime(2017, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
-    type_of_entity="TestDummyComponent"
-)
-tr4 = copy(tr3)
-tr4.description = "green"
 t1 = TestDummyComponent()
-tr5 = TestDummyComponentRevision(description="pink")
+t1r1blue = TestDummyComponentRevision(description="blue")
+ts = TestDummySubComponent(ref_super=t1.id)
+ts1r1green = TestDummySubComponentRevision(description="green")
+create_entity!(w1blue)
+create_component!(t1, t1r1blue, w1blue)
+println(t1r1blue)
+create_subcomponent!(t1, ts, ts1r1green, w1blue)
+w1blue.ref_history != Nothing
+@test w1blue.is_committed == 0
+@test w1blue.ref_version == t1r1blue.ref_validfrom
+@test w1blue.ref_version == ts1r1green.ref_validfrom
 
-# @test tr3.ref_invalidfrom==MaxVersion
+#2.1.2 Commiting workflow 1
+commit_workflow!(w1blue)
+@test w1blue.is_committed == 1
 
-update_entity!(w4)
-update_component!(tr3, tr4, w4)
-println(tr4)
-create_component!(t1, tr5, w4)
-println(tr5)
+#2.2 Workflow 2 ( the yellow rectangle that shortens the blue one)
+#2.2.1 Starting workflow 2
+#mutating component 1
 
+w2yellow = Workflow(type_of_entity="TestDummyComponent",
+    ref_history=w1blue.ref_history,
+    tsw_validfrom=ZonedDateTime(2015, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+)
+t1r2yellow = copy(t1r1blue)
+t1r2yellow.description = "yellow"
+update_entity!(w2yellow)
+update_component!(t1r1blue, t1r2yellow, w2yellow)
+println(t1r2yellow)
+@test w2yellow.ref_version == t1r2yellow.ref_validfrom
+@test w2yellow.ref_version == t1r1blue.ref_invalidfrom
+
+# 2.2.2 Committing workflow 2
+commit_workflow!(w2yellow)
+@test w2yellow.is_committed == 1
+
+# 2.3 workflow 3 (the red rectancle that shadows the yellow one)
+# 2.3.1 Starting workflow 3
+w3redshadow = Workflow(type_of_entity="TestDummyComponent",
+    ref_history=w1blue.ref_history,
+    tsw_validfrom=ZonedDateTime(2014, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+)
+update_entity!(w3redshadow)
+t1r1blue = findcomponentrevision(TestDummyComponentRevision, t1.id, w3redshadow.ref_version)[1]
+t1r3red = copy(t1r1blue)
+t1r3red.description = "red"
+update_component!(t1r1blue, t1r3red, w3redshadow)
+@test w3redshadow.ref_version == t1r3red.ref_validfrom
+# .3.4 Committing workflow 3
+commit_workflow!(w3redshadow)
+@test w3redshadow.is_committed == 1
+# 3 Testing
+# For each workflow
+# 
+# as of its intervals valid from points
+# as of its intervals db valid from and 1 second before its world validfrom
+v1 = findversion(w1blue.ref_history, w1blue.tsdb_validfrom, w1blue.tsw_validfrom)
+
+@test findcomponentrevision(TestDummyComponentRevision, t1.id, v1)[1].description == "blue"
+
+v2 = findversion(w2yellow.ref_history, w2yellow.tsdb_validfrom, w2yellow.tsw_validfrom)
+
+@test findcomponentrevision(TestDummyComponentRevision, t1.id, v2)[1].description == "yellow"
+
+v2a = findversion(w2yellow.ref_history, w2yellow.tsdb_validfrom, w2yellow.tsw_validfrom - Dates.Second(1))
+
+@test findcomponentrevision(TestDummyComponentRevision, t1.id, v2a)[1].description == "blue"
+
+v3 = findversion(w3redshadow.ref_history, w3redshadow.tsdb_validfrom, w3redshadow.tsw_validfrom)
+
+@test findcomponentrevision(TestDummyComponentRevision, t1.id, v3)[1].description == "red"
+
+v3a = findversion(w3redshadow.ref_history, w3redshadow.tsdb_validfrom, w3redshadow.tsw_validfrom - Dates.Second(1))
+
+@test findcomponentrevision(TestDummyComponentRevision, t1.id, v3a)[1].description == "blue"
+v1 = findversion(w1blue.ref_history, w1blue.tsdb_validfrom, w1blue.tsw_validfrom)
+r1 = findcomponentrevision(TestDummySubComponentRevision, ts.id, v1)
+@testset "reading tests" begin
+    v1 = findversion(w1blue.ref_history, w1blue.tsdb_validfrom, w1blue.tsw_validfrom)
+
+    @test findcomponentrevision(TestDummyComponentRevision, t1.id, v1)[1].description == "blue"
+    @test findcomponentrevision(TestDummySubComponentRevision, ts.id, v1)[1].description == "green"
+
+    v2 = findversion(w2yellow.ref_history, w2yellow.tsdb_validfrom, w2yellow.tsw_validfrom)
+
+    @test findcomponentrevision(TestDummyComponentRevision, t1.id, v2)[1].description == "yellow"
+    @test findcomponentrevision(TestDummySubComponentRevision, ts.id, v2)[1].description == "green"
+
+    v2a = findversion(w2yellow.ref_history, w2yellow.tsdb_validfrom, w2yellow.tsw_validfrom - Dates.Second(1))
+
+    @test findcomponentrevision(TestDummyComponentRevision, t1.id, v2a)[1].description == "blue"
+    @test findcomponentrevision(TestDummySubComponentRevision, ts.id, v2a)[1].description == "green"
+
+
+    v3 = findversion(w3redshadow.ref_history, w3redshadow.tsdb_validfrom, w3redshadow.tsw_validfrom)
+
+    @test findcomponentrevision(TestDummyComponentRevision, t1.id, v3)[1].description == "red"
+    @test findcomponentrevision(TestDummySubComponentRevision, ts.id, v3)[1].description == "green"
+
+    v3a = findversion(w3redshadow.ref_history, w3redshadow.tsdb_validfrom, w3redshadow.tsw_validfrom - Dates.Second(1))
+
+    @test findcomponentrevision(TestDummyComponentRevision, t1.id, v3a)[1].description == "blue"
+    @test findcomponentrevision(TestDummySubComponentRevision, ts.id, v3a)[1].description == "green"
+
+end
+# Testing pending transactions and rollback
+
+w4PendingRollback = Workflow(type_of_entity="TestDummyComponent",
+    ref_history=w1blue.ref_history,
+    tsdb_validfrom=now(tz"Africa/Porto-Novo"),
+    tsw_validfrom=ZonedDateTime(2017, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+)
+update_entity!(w4PendingRollback)
+
+t1r3red = findcomponentrevision(TestDummyComponentRevision, t1.id, w4PendingRollback.ref_version)[1]
+t1r4green = copy(t1r3red)
+t1r4green.description = "green"
+
+t2 = TestDummyComponent()
+t2r1pink = TestDummyComponentRevision(description="pink")
+
+@test t1r3red.ref_invalidfrom == MaxVersion
+update_component!(t1r3red, t1r4green, w4PendingRollback)
+create_component!(t2, t2r1pink, w4PendingRollback)
 @testset "pending transaction tests" begin
-    v4 = find(Version, SQLWhereExpression("id=?", w4.ref_version))[1].id
-    @test findcomponentrevision(TestDummyComponentRevision, t.id, v4)[1].description ==
-          "green"
-    @test findcomponentrevision(TestDummyComponentRevision, t1.id, v4)[1].description ==
-          "pink"
-    @test w4.ref_version == tr3.ref_invalidfrom
-    @test w4.ref_version == tr4.ref_validfrom
-    @test MaxVersion == tr4.ref_invalidfrom
-    @test w4.ref_version == tr5.ref_validfrom
+    @test findcomponentrevision(TestDummyComponentRevision, t1.id, w4PendingRollback.ref_version)[1].description == "green"
+    @test findcomponentrevision(TestDummyComponentRevision, t2.id, w4PendingRollback.ref_version)[1].description == "pink"
+    @test w4PendingRollback.ref_version == t1r3red.ref_invalidfrom
+    @test w4PendingRollback.ref_version == t1r4green.ref_validfrom
+    @test MaxVersion == t1r4green.ref_invalidfrom
+    @test w4PendingRollback.ref_version == t2r1pink.ref_validfrom
 end
-println(tr4)
-println(tr3)
-
-currentVersion = find(Version, SQLWhereExpression("id=?", w4.ref_version))[1]
-currentInterval =
-    find(ValidityInterval, SQLWhereExpression("ref_version=?", w4.ref_version))[1]
-tr3b = find(TestDummyComponentRevision, SQLWhereExpression("id=?", tr3.id))[1]
-# delete(currentVersion)
-rollback_workflow!(w4)
-tr3b = find(TestDummyComponentRevision, SQLWhereExpression("id=?", tr3.id))[1]
-println(tr3b)
-@testset "rollback transaction tests" begin
-    @test tr3b.ref_invalidfrom == MaxVersion
-    @test findcomponentrevision(TestDummyComponentRevision, t.id, DbId(4))[1].description ==
-          "red"
-    @test isempty(find(TestDummyComponentRevision, SQLWhereExpression("id=?", tr4.id)))
-    @test isempty(find(TestDummyComponent, SQLWhereExpression("id=?", t1.id)))
-    @test isempty(find(Version, SQLWhereExpression("id=?", currentVersion.id)))
-    @test isempty(find(ValidityInterval, SQLWhereExpression("id=?", currentInterval.id)))
-
+@testset "rollbacked transaction tests" begin
+    rollback_workflow!(w4PendingRollback)
+    @test !isempty(findcomponentrevision(TestDummyComponentRevision, t1.id, w4PendingRollback.ref_version))
+    w4PendingRollback.ref_version == t1r3red.ref_invalidfrom
+    w4PendingRollback.ref_version == t1r4green.ref_validfrom
 end
-
-@testset "mkforest" begin
-    hforest =
-        mkforest(DbId(1))
-    print_tree(hforest)
-    @test hforest[1].interval.ref_version.value == 3
-    @test hforest[1].shadowed[1].interval.ref_version.value == 2
-    @test hforest[2].interval.ref_version.value == 1
-    @test isempty(hforest[2].shadowed)
+w3redshadow = Workflow(type_of_entity="TestDummyComponent",
+    ref_history=w1blue.ref_history,
+    tsw_validfrom=ZonedDateTime(2014, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+)
+# 2.3.2 Testing retrospective transactions
+# 2.3.2.1 preparing the retrospective transaction by
+# preliminarily invalidating all insertions and mutations from shadowed versions and
+# reviving all revisions invalidated by shadowed versions
+update_entity!(w3redshadow)
+@testset "retrospective update entity red revive and invalidate shadowed " begin
+    # have currently shadowed revisions been invalidated?
+    @test !isempty(find(TestDummyComponentRevision, SQLWhereExpression("ref_invalidfrom=?", w3redshadow.ref_version)))
+    # have revisions invalidated by shadowed versions been revived?
+    @test !isempty(find(TestDummyComponentRevision, SQLWhereExpression("ref_validfrom=?", w3redshadow.ref_version)))
+end
+# 2.3.2.2 Does rolling back the transaction delete the preliminary revisions?
+rollback_workflow!(w3redshadow)
+@testset "retrospective update entity red revive and invalidate shadowed " begin
+    # have currently shadowed revisions been invalidated?
+    @test isempty(find(TestDummyComponentRevision, SQLWhereExpression("ref_invalidfrom=?", w3redshadow.ref_version)))
+    # have revisions invalidated by shadowed versions been revived?
+    @test isempty(find(TestDummyComponentRevision, SQLWhereExpression("ref_validfrom=?", w3redshadow.ref_version)))
 end
