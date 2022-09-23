@@ -20,8 +20,6 @@ jobs:
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres
-          SEARCHLIGHT_PASSWORD: postgres
-          SEARCHLIGHT_USERNAME: postgres
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -37,5 +35,5 @@ jobs:
         uses: julia-actions/setup-julia@v1
         with:
           version: '1.8.0'
-      - run: GENIE_ENV="test" julia --project=$(pwd) workflowtest.jl
+      - run: GENIE_ENV="test" SEARCHLIGHT_PASSWORD="postgres" SEARCHLIGHT_USERNAME="postgres" julia --project=$(pwd) workflowtest.jl
         shell: bash
