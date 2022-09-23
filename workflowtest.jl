@@ -11,10 +11,10 @@ include("init.jl")
 using SearchLight
 using SearchLightPostgreSQL
 # run(`psql -f sqlsnippets/droptables.sql`)
-if (haskey(ENV, "GITHUB_ACTION") && ENV["GITHUB_ACTION"] == "CI")
-    ENV["SEARCHLIGHT_PASSWORD"] = "postgres"
-    ENV["SEARCHLIGHT_USERNAME"] = "postgres"
-end
+#if (haskey(ENV, "GITHUB_ACTION") && ENV["GITHUB_ACTION"] == "CI")
+ENV["SEARCHLIGHT_PASSWORD"] = "postgres"
+ENV["SEARCHLIGHT_USERNAME"] = "postgres"
+#end
 SearchLight.connect(SearchLight.Configuration.load())
 SearchLight.Migrations.create_migrations_table()
 BitemporalPostgres.up()
