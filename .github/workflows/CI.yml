@@ -20,6 +20,8 @@ jobs:
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: postgres
+          SEARCHLIGHT_PASSWORD: postgres
+          SEARCHLIGHT_USERNAME: postgres
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
