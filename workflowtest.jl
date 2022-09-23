@@ -11,8 +11,10 @@ include("init.jl")
 using SearchLight
 using SearchLightPostgreSQL
 # run(`psql -f sqlsnippets/droptables.sql`)
-ENV["SEARCHLIGHT_PASSWORD"] = "postgres"
-ENV["SEARCHLIGHT_USERNAME"] = "postgres"
+if (haskey(ENV, "GITHUB_ACTION") && ENV["GITHUB_ACTION"] == "CI")
+    ENV["SEARCHLIGHT_PASSWORD"] = "postgres"
+    ENV["SEARCHLIGHT_USERNAME"] = "postgres"
+end
 SearchLight.connect(SearchLight.Configuration.load())
 SearchLight.Migrations.create_migrations_table()
 BitemporalPostgres.up()
@@ -40,7 +42,7 @@ create_subcomponent!(t1, ts, ts1r1green, w1blue)
 w1blue.ref_history != Nothing
 @test w1blue.is_committed == 0
 
-ef_version == t1r1blue.ref_validfrom
+@test w1blue.ref_version == t1r1blue.ref_validfrom
 @test w1blue.ref_version == ts1r1green.ref_validfrom
 
 #2.1.2 Commiting workflow 1
