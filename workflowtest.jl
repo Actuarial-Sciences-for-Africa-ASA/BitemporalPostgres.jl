@@ -11,8 +11,8 @@ include("init.jl")
 using SearchLight
 using SearchLightPostgreSQL
 # run(`psql -f sqlsnippets/droptables.sql`)
-#ENV["SEARCHLIGHT_PASSWORD"] = "jw8s0F49KL"
-#ENV["SEARCHLIGHT_USERNAME"] = "bitemporalpostgres"
+ENV["SEARCHLIGHT_PASSWORD"] = "postgres"
+ENV["SEARCHLIGHT_USERNAME"] = "postgres"
 SearchLight.connect(SearchLight.Configuration.load())
 SearchLight.Migrations.create_migrations_table()
 BitemporalPostgres.up()
