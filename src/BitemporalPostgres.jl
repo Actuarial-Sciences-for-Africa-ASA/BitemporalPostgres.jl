@@ -2,7 +2,7 @@ module BitemporalPostgres
 import SearchLight: AbstractModel, DbId, query, save!
 import SearchLightPostgreSQL
 import Base: @kwdef
-import Intervals, Dates, TimeZones
+import Dates, Intervals, Logging, TimeZones
 using Intervals,
     Dates,
     SearchLight,
@@ -609,6 +609,7 @@ update_entity!(w::Workflow)
 
 """
 function update_entity!(w::Workflow)
+    @info "entering update"
     transaction() do
         hid = w.ref_history
         v = Version(ref_history=hid)
@@ -639,10 +640,7 @@ function update_entity!(w::Workflow)
             )) do shadowed
             shadowed.ref_version
         end
-        println("++++++++++++++++++++++++++++++++++++++++++++++")
-        println("shadowed")
-        println(shadowed_versions)
-        println("++++++++++++++++++++++++++++++++++++++++++++++")
+        @info("shadowed" * string(shadowed_versions))
 
         map(revisionTypes(Val(Symbol(w.type_of_entity)))) do st
             # Preliminarily invalidating all insertions and mutations from shadowed versions
@@ -652,10 +650,7 @@ function update_entity!(w::Workflow)
                     map(found) do toTerminate
                         toTerminate.ref_invalidfrom = DbId(active_version)
                         save!(toTerminate)
-                        println("++++++++++++++++++++++++++++++++++++++++++++++")
-                        println("toTerminate" * string(toTerminate))
-                        println("++++++++++++++++++++++++++++++++++++++++++++++")
-
+                        @info("toTerminate" * string(toTerminate))
                     end
                     found
                 end
@@ -670,9 +665,7 @@ function update_entity!(w::Workflow)
                             revived.id = DbId()
                             revived.ref_validfrom = active_version
                             revived.ref_invalidfrom = MaxVersion
-                            println("++++++++++++++++++++++++++++++++++++++++++++++")
-                            println("to revive" * string(revived))
-                            println("++++++++++++++++++++++++++++++++++++++++++++++")
+                            @info("to revive" * string(revived))
                             save!(revived)
                         end
                     end
