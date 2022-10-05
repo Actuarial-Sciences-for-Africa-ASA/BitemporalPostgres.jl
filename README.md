@@ -8,11 +8,33 @@
 
 For use cases see [a jupyter notebook with tests ]](bitemporal_testcase.ipynb)
 
-# BitemporalPostgres provides an API for application based bitemporal, that is: audit proof,  transactions with Julia and Postgres DB. Transactions are "long", with persistent transaction data that is, so they can serve as a basis of workflow management: they can be suspended, resumed and delegated.
+# Architecture
+BitemporalPostgres provides an API for application based bitemporal, that is: audit proof,  transactions with Julia and Postgres DB. Transactions are "long", with persistent transaction data that is, so they can serve as a basis of workflow management: they can be suspended, resumed and delegated.
 
-Documentation
+A bitemporal data manager creates or mutates bitemporal entities as of a point in reference time.
+A bitemporal transaction - here also called workflow - is started in two ways:
+
+create_entity creates
+- an instance of history - the root of bitemporal entities -
+- a version 
+- a validity_interval
+
+update entity creates 
+- a version 
+- a valididity_interval 
+and references  
+- a given history
+
+while these data comprise the scaffolding needed for bitemporal tracking of mutations, components and revisions comprise the business payload, as well as subcomponents and their revisions.
+
+thus mutation of Business data consists of 
+-creation or invalidation of components/subcomponents together with their revisions and of
+- updates of attributes of revisions
+
+# Documentation
 [here](https://actuarial-sciences-for-africa-asa.github.io/BitemporalPostgres.jl/dev/)
 
+# Usage
 A web app using this module for persistence is being built at https://github.com/actuarial-sciences-for-africa-asa/BitemporalReactive.jl
 
 

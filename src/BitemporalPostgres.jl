@@ -805,8 +805,6 @@ function rollback_workflow!(w::Workflow)
     transaction() do
         v = find(Version, SQLWhereExpression("id=?", w.ref_version))[1]
         delete(v)
-        w.is_committed = 2
-        save(w)
     end
 end
 
