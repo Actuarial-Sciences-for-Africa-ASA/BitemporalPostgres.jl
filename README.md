@@ -6,7 +6,7 @@
 
 [![pkgeval](https://juliahub.com/docs/BitemporalPostgres/pkgeval.svg)](https://juliahub.com/ui/Packages/BitemporalPostgres/ZmypI) Testing on Juliahub fails as PkgEval is not applicable because tests require a running POSTGRES server.
 
-For use cases see [a jupyter notebook with tests ]](bitemporal_testcase.ipynb)
+For use cases see [a jupyter notebook with tests ](bitemporal_testcase.ipynb)
 
 # Architecture
 BitemporalPostgres provides an API for application based bitemporal, that is: audit proof,  transactions with Julia and Postgres DB. Transactions are "long", with persistent transaction data that is, so they can serve as a basis of workflow management: they can be suspended, resumed and delegated.
