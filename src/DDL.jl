@@ -132,7 +132,7 @@ function up()
       column(:id, :bigserial, "PRIMARY KEY")
       column(:ref_component, :bigint, "REFERENCES testdummyComponents(id)")
       column(:ref_validfrom, :bigint, "REFERENCES versions(id) ON DELETE CASCADE")
-      column(:ref_invalidfrom, :bigint, "DEFAULT 9223372036854775807 REFERENCES versions(id) ON DELETE SET DEFAULT")
+      column(:ref_invalidfrom, :bigint, "DEFAULT 2^53 - 1 REFERENCES versions(id) ON DELETE SET DEFAULT")
       column(:ref_valid, :int8range)
       column(:description, :string)
     ]
@@ -152,7 +152,7 @@ function up()
       column(:id, :bigserial, "PRIMARY KEY")
       column(:ref_component, :bigint, "REFERENCES testdummySubComponents(id)")
       column(:ref_validfrom, :bigint, "REFERENCES versions(id) ON DELETE CASCADE")
-      column(:ref_invalidfrom, :bigint, "DEFAULT 9223372036854775807 REFERENCES versions(id) ON DELETE SET DEFAULT")
+      column(:ref_invalidfrom, :bigint, "DEFAULT 2^53 - 1 REFERENCES versions(id) ON DELETE SET DEFAULT")
       column(:ref_valid, :int8range)
       column(:description, :string)
     ]
@@ -192,7 +192,7 @@ function up()
   SearchLight.query(createTestdummySubComponentRevisionsConstraints)
   MaxDate = ZonedDateTime(DateTime(2038, 1, 19, 14, 7), tz"UTC")
   MaxDateSQL = SQLInput(MaxDate)
-  InfinityKey = 9223372036854775807::Integer
+  InfinityKey = 2^53 - 1::Integer
 
   SearchLight.query("""
   INSERT INTO histories VALUES($InfinityKey,0)

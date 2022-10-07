@@ -111,6 +111,10 @@ end
 # One ms less than the maximum date, as 
 const MaxDate = ZonedDateTime(DateTime(2038, 1, 19, 3, 14, 6, 999), tz"UTC")
 const MaxDateSQL = SQLInput(MaxDate)
+"""
+InfinityKey 
+    in order to ease integration with javascript we use javascript's MAX_SAFE_INTEGER 2^53 - 1
+"""
 const InfinityKey = 2^53 - 1
 const MaxVersion = DbId(InfinityKey)
 """
