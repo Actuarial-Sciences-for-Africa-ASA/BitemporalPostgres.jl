@@ -37,7 +37,7 @@ create_entity!(w1blue)
 create_component!(t1, t1r1blue, w1blue)
 println(t1r1blue)
 create_subcomponent!(t1, ts, ts1r1green, w1blue)
-w1blue.ref_history != Nothing
+@test !isnothing(w1blue.ref_history)
 @test w1blue.is_committed == 0
 
 @test w1blue.ref_version == t1r1blue.ref_validfrom

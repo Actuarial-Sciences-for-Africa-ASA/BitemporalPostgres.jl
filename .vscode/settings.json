@@ -15,7 +15,7 @@
     "terminal.integrated.commandsToSkipShell": [
         "language-julia.interrupt"
     ],
-    "julia.executablePath": "~/julia-1.8.0/bin/julia",
+    "julia.executablePath": "~/julia-1.8.2/bin/julia",
     "julia.symbolCacheDownload": true,
     "julia.enableTelemetry": true,
     "settingsSync.ignoredExtensions": [
@@ -32,11 +32,11 @@
             "previewLimit": 50,
             "server": "localhost",
             "port": 5432,
-            "askForPassword": true,
             "driver": "PostgreSQL",
             "name": "postgres",
             "database": "postgres",
-            "username": "gitpod"
+            "username": "postgres",
+            "password": "postgres"
         }
     ],
     "julia.NumThreads": 0
