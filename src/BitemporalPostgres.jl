@@ -93,8 +93,8 @@ end
 @kwdef mutable struct Testtstzrange <: AbstractModel
     id::DbId = DbId()
     i::Interval{ZonedDateTime,Closed,Open} = Interval{ZonedDateTime,Closed,Open}(
-        ZonedDateTime(2013, 2, 13, 0, 30, 0, 1, tz"America/Winnipeg"),
-        ZonedDateTime(2030, 2, 13, 0, 30, 0, 1, tz"America/Winnipeg"),
+        ZonedDateTime(2013, 2, 13, 0, 30, 0, 1, tz"UTC"),
+        ZonedDateTime(2030, 2, 13, 0, 30, 0, 1, tz"UTC"),
     )
 end
 
