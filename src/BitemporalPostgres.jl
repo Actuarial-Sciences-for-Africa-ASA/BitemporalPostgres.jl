@@ -532,7 +532,7 @@ function create_entity!(w::Workflow)
             ref_version=v.id,
             tsworld_validfrom=w.tsw_validfrom,
             tsworld_invalidfrom=MaxDate,
-            tsdb_validfrom=now(tz"Africa/Porto-Novo"),
+            tsdb_validfrom=now(tz"UTC"),
             tsdb_invalidfrom=MaxDate,
         )
         save!(i)
@@ -627,7 +627,7 @@ function update_entity!(w::Workflow)
             ref_version=v.id,
             tsworld_validfrom=w.tsw_validfrom,
             tsworld_invalidfrom=MaxDate,
-            tsdb_validfrom=now(tz"Africa/Porto-Novo"),
+            tsdb_validfrom=now(tz"UTC"),
             tsdb_invalidfrom=MaxDate,
         )
         save!(i)
@@ -743,7 +743,7 @@ commit_workflow!(w::Workflow)
 """
 function commit_workflow!(w::Workflow)
     transaction() do
-        w.tsdb_validfrom = now(tz"Africa/Porto-Novo")
+        w.tsdb_validfrom = now(tz"UTC")
 
         uncommitted = find(
             ValidityInterval,

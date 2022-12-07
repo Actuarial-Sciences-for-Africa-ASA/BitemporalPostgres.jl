@@ -27,7 +27,7 @@ import BitemporalPostgres
 using BitemporalPostgres
 
 w1blue = Workflow(type_of_entity="TestDummyComponent",
-    tsw_validfrom=ZonedDateTime(2014, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"))
+    tsw_validfrom=ZonedDateTime(2014, 5, 30, 21, 0, 1, 1, tz"UTC"))
 
 t1 = TestDummyComponent()
 t1r1blue = TestDummyComponentRevision(description="blue")
@@ -53,7 +53,7 @@ commit_workflow!(w1blue)
 
 w2yellow = Workflow(type_of_entity="TestDummyComponent",
     ref_history=w1blue.ref_history,
-    tsw_validfrom=ZonedDateTime(2015, 5, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+    tsw_validfrom=ZonedDateTime(2015, 5, 30, 21, 0, 1, 1, tz"UTC"),
 )
 t1r2yellow = copy(t1r1blue)
 t1r2yellow.description = "yellow"
@@ -71,7 +71,7 @@ commit_workflow!(w2yellow)
 # 2.3.1 Starting workflow 3
 w3redshadow = Workflow(type_of_entity="TestDummyComponent",
     ref_history=w1blue.ref_history,
-    tsw_validfrom=ZonedDateTime(2014, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+    tsw_validfrom=ZonedDateTime(2014, 11, 30, 21, 0, 1, 1, tz"UTC"),
 )
 update_entity!(w3redshadow)
 t1r1blue = findcomponentrevision(TestDummyComponentRevision, t1.id, w3redshadow.ref_version)[1]
@@ -140,8 +140,8 @@ end
 
 w4PendingRollback = Workflow(type_of_entity="TestDummyComponent",
     ref_history=w1blue.ref_history,
-    tsdb_validfrom=now(tz"Africa/Porto-Novo"),
-    tsw_validfrom=ZonedDateTime(2017, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+    tsdb_validfrom=now(tz"UTC"),
+    tsw_validfrom=ZonedDateTime(2017, 11, 30, 21, 0, 1, 1, tz"UTC"),
 )
 update_entity!(w4PendingRollback)
 
@@ -171,7 +171,7 @@ end
 end
 w3redshadow = Workflow(type_of_entity="TestDummyComponent",
     ref_history=w1blue.ref_history,
-    tsw_validfrom=ZonedDateTime(2014, 11, 30, 21, 0, 1, 1, tz"Africa/Porto-Novo"),
+    tsw_validfrom=ZonedDateTime(2014, 11, 30, 21, 0, 1, 1, tz"UTC"),
 )
 # 2.3.2 Testing retrospective transactions
 # 2.3.2.1 preparing the retrospective transaction by
