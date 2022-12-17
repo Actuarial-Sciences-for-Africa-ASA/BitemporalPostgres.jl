@@ -312,15 +312,6 @@ TestDummySubComponent <: Component
 end
 
 """
-get_typeof_revision(component::TestDummySubComponent) :: T where {T<:ComponentRevision}
-"""
-function get_typeof_revision(
-    component::TestDummySubComponent,
-)::Type{TestDummySubComponentRevision}
-    TestDummySubComponentRevision
-end
-
-"""
 TestDummySubComponentRevision <: ComponentRevision
 
   a revision of a contract component of a bitemporal entity
