@@ -210,22 +210,18 @@ ComponentRevision
 abstract type ComponentRevision <: AbstractModel end
 
 """
-get_typeof_revision(component::T) :: R where {T<: Component, R <: ComponentRevision} 
+get_typeof_revision(component::T)::Type{R} where {T<:Component,R<:ComponentRevision}
     returns the actual subtype of ComponentRevision that fits the actual type of Component 
 """
-function get_typeof_revision(
-    component::T,
-)::Type{R} where {T<:Component,R<:ComponentRevision}
+function get_typeof_revision(component::T)::Type{R} where {T<:Component,R<:ComponentRevision}
     Type{R}
 end
 
 """
-get_typeof_component(revision::T) :: R where {T<: ComponentRevision, R <: Component 
+get_typeof_component(component::T)::Type{R} where {T<:ComponentRevision,R<:Component}
     returns the actual subtype of Component that fits the actual type of ComponentRevision 
 """
-function get_typeof_component(
-    component::T,
-)::Type{R} where {T<:ComponentRevision,R<:Componen}
+function get_typeof_component(component::T)::Type{R} where {T<:ComponentRevision,R<:Component}
     Type{R}
 end
 
@@ -270,13 +266,6 @@ TestDummyComponent <: Component
 end
 
 """
-get_typeof_revision(component::TestDummyComponent) :: T where {T<:ComponentRevision}
-"""
-function get_typeof_revision(component::TestDummyComponent)::T where {T<:ComponentRevision}
-    TestDummyComponentRevision
-end
-
-"""
 TestDummyComponentRevision <: ComponentRevision
 
   a revision of a contract component of a bitemporal entity
@@ -288,6 +277,21 @@ TestDummyComponentRevision <: ComponentRevision
     ref_validfrom::DbId = InfinityKey
     ref_invalidfrom::DbId = InfinityKey
     description::String = ""
+end
+
+
+"""
+get_typeof_revision(component::TestDummyComponent) :: Type{TestDummyComponentRevision}
+"""
+function get_typeof_revision(component::TestDummyComponent)::Type{TestDummyComponentRevision}
+    TestDummyComponentRevision
+end
+
+"""
+get_typeof_component(revision::TestDummyComponentRevision) :: Type{TestDummyComponent}
+"""
+function get_typeof_component(revision::TestDummyComponentRevision)::Type{TestDummyComponent}
+    TestDummyComponent
 end
 
 Base.copy(src::TestDummyComponentRevision) = TestDummyComponentRevision(

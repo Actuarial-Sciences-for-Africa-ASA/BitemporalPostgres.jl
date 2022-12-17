@@ -192,3 +192,7 @@ rollback_workflow!(w3redshadow)
     # have revisions invalidated by shadowed versions been revived?
     @test isempty(find(TestDummyComponentRevision, SQLWhereExpression("ref_validfrom=?", w3redshadow.ref_version)))
 end
+
+@testset "get_typeof functions" begin
+    @test get_typeof_revision(get_typeof_component(TestDummyComponentRevision())()) == TestDummyComponentRevision
+end
