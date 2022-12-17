@@ -17,6 +17,7 @@ export History,
     Version,
     Component,
     get_typeof_revision,
+    get_typeof_component,
     SubComponent,
     ComponentRevision,
     ValidityInterval,
@@ -210,11 +211,21 @@ abstract type ComponentRevision <: AbstractModel end
 
 """
 get_typeof_revision(component::T) :: R where {T<: Component, R <: ComponentRevision} 
-    returns the actual subtype of ComponentRevision that fits the actual type of component 
+    returns the actual subtype of ComponentRevision that fits the actual type of Component 
 """
 function get_typeof_revision(
     component::T,
 )::Type{R} where {T<:Component,R<:ComponentRevision}
+    Type{R}
+end
+
+"""
+get_typeof_component(revision::T) :: R where {T<: ComponentRevision, R <: Component 
+    returns the actual subtype of Component that fits the actual type of ComponentRevision 
+"""
+function get_typeof_component(
+    component::T,
+)::Type{R} where {T<:ComponentRevision,R<:Componen}
     Type{R}
 end
 
