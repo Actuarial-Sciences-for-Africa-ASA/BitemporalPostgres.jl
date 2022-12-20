@@ -752,8 +752,10 @@ function delete_component!(r::T, w::Workflow) where {T<:ComponentRevision}
             """
             c was created for current version, foreign key constraint cascades  deletion to revision 
             """
+
             c = find(get_typeof_component(T), SQLWhereExpression("id=?", r.ref_component))[1]
             delete(c)
+            @info "new component is deleted"
         else
             if vid.value >= r.ref_validfrom.value && vid.value < r.ref_invalidfrom.value
                 """
@@ -761,6 +763,7 @@ function delete_component!(r::T, w::Workflow) where {T<:ComponentRevision}
                 """
                 r.ref_invalidfrom = vid
                 save!(r)
+                @info "older component is deleted"
             end
         end
     end
