@@ -738,6 +738,34 @@ function delete_component!(c::T, w::Workflow) where {T<:Component}
         end
     end
 end
+"""
+delete_component!(r::T, w::Workflow)  where {T<:ComponentRevision}
+
+ * deletes a component if it was created for the current version or
+ * mark its latest component revision as invalid
+
+"""
+function delete_component!(r::T, w::Workflow) where {T<:ComponentRevision}
+    transaction() do
+        vid = w.ref_version
+        if r.ref_validfrom == vid
+            """
+            c was created for current version, foreign key constraint cascades  deletion to revision 
+            """
+            c=find(get_typeof_component(T),SQLWhereExpression("id=?", r.ref_component))[1]
+            delete(c)
+        else
+            if vid.value >= r.ref_validfrom.value && vid.value < r.ref_invalidfrom.value
+                """
+                the current revision gets terminated 
+                """
+                r.ref_invalidfrom = vid
+                save!(r)
+            end
+        end
+    end
+end
+end
 
 """
 commit_workflow!(w::Workflow)
