@@ -427,7 +427,7 @@ function get_revision(
 end
 
 """
-get_revision(rtype::Type{RT}, hid::DbId, vid::DbId) where {RT<:ComponentRevision}
+get_revision(rtype::Type{RT}, cid::DbId, vid::DbId) where {RT<:ComponentRevision}
 
     retrieves the revision of component cid as of version vid 
     the revision must exist
@@ -488,7 +488,7 @@ end
 
 """
 function get_revisionIfAny(rtype::Type{RT}, hid::DbId, vid::DbId, )::Vector{RT} where {RT<:ComponentRevision}
-    retrieves the revision of the unique component of type CT in history hid if one exists as of version vid 
+    retrieves the revision of component cid if one exists as of version vid 
     
     An optional component may have a revision for a version later as vid. In such cases a component w/o valid revision is itself valid, just to be ignored for the current version.
 
