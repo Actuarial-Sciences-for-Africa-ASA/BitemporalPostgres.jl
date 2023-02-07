@@ -34,6 +34,6 @@ jobs:
       - name: "Set up Julia"
         uses: julia-actions/setup-julia@v1
         with:
-          version: '1.8.0'
+          version: '1.8.2'
       - run: GENIE_ENV="test" SEARCHLIGHT_PASSWORD="postgres" SEARCHLIGHT_USERNAME="postgres" julia --project=$(pwd) workflowtest.jl
         shell: bash
