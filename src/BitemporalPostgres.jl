@@ -626,9 +626,9 @@ function update_entity!(w::Workflow)
         save!(v)
         active_version = v.id
         w.ref_version = active_version
-        w.tsdb_validfrom = now(tz"UTC")
+        w.tsdb_validfrom = now(tz"UTC"),
         save!(w)
-        update
+
         i = ValidityInterval(
             ref_history=hid,
             ref_version=v.id,
