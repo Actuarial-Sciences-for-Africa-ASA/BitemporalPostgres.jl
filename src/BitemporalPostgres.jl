@@ -626,6 +626,7 @@ function update_entity!(w::Workflow)
         save!(v)
         active_version = v.id
         w.ref_version = active_version
+        w.tsdb_validfrom = now(tz"UTC"),
         save!(w)
 
         i = ValidityInterval(
@@ -633,7 +634,7 @@ function update_entity!(w::Workflow)
             ref_version=v.id,
             tsworld_validfrom=w.tsw_validfrom,
             tsworld_invalidfrom=MaxDate,
-            tsdb_validfrom=now(tz"UTC"),
+            tsdb_validfrom=w.tsdb_validfrom,
             tsdb_invalidfrom=MaxDate,
         )
         save!(i)
