@@ -167,13 +167,12 @@ Transactions here are application based. A transaction is identified by a versio
 * an interval of validity labelled as not committed and
 
 ```math
-\hspace*{10mm} validity = [now,∞) [w,∞)
+validity = [now,∞) [w,∞)
 ```
 * with retrospective transactions
   *  all revisions valid from now shadowed versions on are marked as invalid from the new version on and
   *  all revisions invalid from now shadowed versions on are revived (copied) and marked as valid from the new version on
-  
-  These actions can be implemented by database constraints.
+
 
 **Mutations of components** consist of
 
@@ -189,6 +188,8 @@ Transactions here are application based. A transaction is identified by a versio
     * explicitly inserted or mutated or
     * implicitly inserted (revived) in the beginning of a retrospective transaction
   * resetting the "invalid from" marks of mutated and shadowed revisions back to infinity(MaxVersion)
+
+  These actions can be implemented by database constraints.
 
 **Committing**  a version consists of
 
