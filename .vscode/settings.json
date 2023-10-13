@@ -33,11 +33,11 @@
             "server": "localhost",
             "port": 5432,
             "driver": "PostgreSQL",
-            "name": "postgres",
-            "database": "postgres",
-            "username": "postgres",
-            "password": "postgres"
+            "username": "gitpod",
+            "name": "gitpod",
+            "database": "postgres"
         }
     ],
-    "julia.NumThreads": 0
+    "julia.NumThreads": 0,
+    "workbench.editor.empty.hint": "hidden"
 }
