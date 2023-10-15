@@ -141,9 +141,9 @@ function up()
   create_table(:testdummySubComponents) do
     [
       column(:id, :bigserial, "PRIMARY KEY")
-      column(:ref_history, :bigint, "REFERENCES testdummyComponents(id) ON DELETE CASCADE")
+      column(:ref_history, :bigint, "REFERENCES histories(id) ON DELETE CASCADE")
       column(:ref_version, :bigint, "REFERENCES versions(id) ON DELETE CASCADE")
-      column(:ref_super, :bigint, "REFERENCES histories(id) ON DELETE CASCADE")
+      column(:ref_super, :bigint, "REFERENCES testdummyComponents(id) ON DELETE CASCADE")
     ]
   end
 
