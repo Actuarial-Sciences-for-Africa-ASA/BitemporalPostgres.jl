@@ -7,6 +7,12 @@ on:
     branches: [main]
     tags: ["*"]
   pull_request:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
 concurrency:
   # Skip intermediate builds: always.
   # Cancel intermediate builds: only if it is a pull request build.
@@ -23,6 +29,9 @@ jobs:
         with:
           version: '1'
       - run: |
+          - run: |
+          echo "Log level: ${{ github.event.inputs.logLevel }}"
+          echo "Tags: ${{ github.event.inputs.tags }}" 
           git config --global user.name name
           git config --global user.email email
           git config --global github.user username
