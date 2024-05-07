@@ -2,11 +2,9 @@ image:
   file: .gitpod.Dockerfile
 tasks:
   - init:
-     mkdir -p .config/direnv \
-     && echo "hier" > bubu.txt \
+     mkdir -p ~/.config/direnv \
      && echo '[whitelist]' > ~/.config/direnv/config.toml \
      && echo 'prefix = [ "/workspace", "/home/gitpod"]' >> ~/.config/direnv/config.toml \
-     && cd .. \
      && echo 'PATH_add ~/julia-1.8.2/bin' > /workspace/.envrc \
      && echo 'export SEARCHLIGHT_USERNAME="gitpod"' >> /workspace/.envrc \
      && direnv allow /workspace 
