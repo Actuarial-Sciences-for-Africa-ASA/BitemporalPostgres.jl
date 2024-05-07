@@ -3,9 +3,7 @@ image:
 tasks:
   - init:
      mkdir -p ~/.config/direnv \
-     && chown gitpod ~/.config/direnv \
      && echo '[whitelist]' > ~/.config/direnv/config.toml \
-     && chown gitpod ~/.config/direnv/config.toml \
      && echo 'prefix = [ "/workspace", "/home/gitpod"]' >> ~/.config/direnv/config.toml \
      && echo 'PATH_add ~/julia-1.8.2/bin' > /workspace/.envrc \
      && echo 'export SEARCHLIGHT_USERNAME="gitpod"' >> /workspace/.envrc \
