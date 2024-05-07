@@ -1,7 +1,7 @@
 image:
   file: .gitpod.Dockerfile
 tasks:
-  - init:
+  - command:
      mkdir -p ~/.config/direnv \
      && echo '[whitelist]' > ~/.config/direnv/config.toml \
      && echo 'prefix = [ "/workspace", "/home/gitpod"]' >> ~/.config/direnv/config.toml \
