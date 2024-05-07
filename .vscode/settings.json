@@ -3,7 +3,6 @@
     "redhat.telemetry.enabled": true,
     "git.autofetch": true,
     "gitpod.openInStable.neverPrompt": true,
-    "workbench.editor.untitled.hint": "hidden",
     "nixEnvSelector.nixFile": "default.nix",
     "workbench.startupEditor": "none",
     "files.exclude": {
