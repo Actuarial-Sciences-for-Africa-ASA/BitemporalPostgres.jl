@@ -6,9 +6,9 @@ tasks:
      && chown gitpod ~/.config/direnv \
      && echo '[whitelist]' > ~/.config/direnv/config.toml \
      && echo 'prefix = [ "/workspace", "/home/gitpod"]' >> ~/.config/direnv/config.toml \
-     && echo 'PATH_add ~/julia-1.8.2/bin' > /workspace/.envrc \
-     && echo 'export SEARCHLIGHT_USERNAME="gitpod"' >> /workspace/.envrc \
-     && direnv allow /workspace 
+     && echo 'PATH_add ~/julia-1.8.2/bin' > .envrc \
+     && echo 'export SEARCHLIGHT_USERNAME="gitpod"' >> .envrc \
+     && direnv allow .
   - command: python3 -m http.server 8080 -d docs/build
   - command: gp preview $(gp url 8080)
   - command: runjulia -e 'include("init.jl")'
