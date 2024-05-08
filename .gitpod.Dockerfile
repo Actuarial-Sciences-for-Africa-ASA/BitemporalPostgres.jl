@@ -5,8 +5,4 @@ RUN sudo wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.2-l
 # Install direnv
 RUN sudo apt-get update && sudo apt-get install -y direnv \
   && direnv hook bash >> /home/gitpod/.bashrc 
-  # && echo '[whitelist]' > .config/direnv/config.toml \
-  # && echo 'prefix = [ "/workspace", "/home/gitpod"]' >> .config/direnv/config.toml \
-  # && echo 'PATH_add /home/gitpod/julia-1.8.2/bin' > /home/gitpod/.envrc \
-  # && echo 'export SEARCHLIGHT_USERNAME="gitpod"' >> /home/gitpod/.envrc 
   

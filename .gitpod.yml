@@ -2,12 +2,8 @@ image:
   file: .gitpod.Dockerfile
 tasks:
   - command:
-     mkdir -p ~/.config/direnv \
-     && echo '[whitelist]' > ~/.config/direnv/config.toml \
-     && echo 'prefix = [ "/workspace", "/home/gitpod"]' >> ~/.config/direnv/config.toml \
-     && echo 'PATH_add ~/julia-1.8.2/bin' > /workspace/.envrc \
+     echo 'PATH_add ~/julia-1.8.2/bin' > /workspace/.envrc \
      && echo 'export SEARCHLIGHT_USERNAME="gitpod"' >> /workspace/.envrc \
      && direnv allow /workspace
      && julia -e 'include("init.jl")'
   - command: python3 -m http.server 8080 -d docs/build
-  - command: gp preview $(gp url 8080)
