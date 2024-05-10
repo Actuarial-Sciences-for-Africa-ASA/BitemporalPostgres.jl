@@ -4,5 +4,5 @@ tasks:
   - init: echo 'PATH_add ~/julia-1.8.2/bin' > /workspace/.envrc \
      && echo 'export SEARCHLIGHT_USERNAME="gitpod"' >> /workspace/.envrc \
      && direnv allow /workspace
-  - command: julia -e 'include("init.jl")'
+  - command: cd . && julia -e 'include("init.jl")'
   - command: python3 -m http.server 8080 -d docs/build
