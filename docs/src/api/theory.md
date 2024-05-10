@@ -1,4 +1,4 @@
-# A Julia template for Bitemporal Data Management based on SearchLight.jl
+# CHANGED A Julia template for Bitemporal Data Management based on SearchLight.jl
 
 This package provides generic functions for CRUD of bitemporal aggregate entities.
 Serializing and deserializing is provided by packages JSON and ToStruct.
