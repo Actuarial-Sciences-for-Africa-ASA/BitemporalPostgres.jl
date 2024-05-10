@@ -35,7 +35,7 @@ jobs:
           git config --global user.name name
           git config --global user.email email
           git config --global github.user username
-      - working-directory: ./docs
+      - working-directory: .
         run: julia --project=. -e 'using Pkg; Pkg.add("Documenter"); Pkg.instantiate(); include("docs/make.jl")'
         env:
           JULIA_PKG_SERVER: ""
