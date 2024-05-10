@@ -1,4 +1,4 @@
-[![CI](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/CI.yml)
+good[![CI](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/CI.yml)
 
 [![Documentation](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/Documentation.yml/badge.svg)](https://github.com/actuarial-sciences-for-africa-asa/BitemporalPostgres.jl/actions/workflows/Documentation.yml)
 
@@ -32,8 +32,8 @@ thus mutation of Business data consists of
 - updates of attributes of revisions
 
 # Documentation
-[dev]africa-asa.github.io/BitemporalPostgres.jl/dev/)
-[stable]africa-asa.github.io/BitemporalPostgres.jl/stable/)
+[dev](africa-asa.github.io/BitemporalPostgres.jl/dev/)
+[stable](africa-asa.github.io/BitemporalPostgres.jl/stable/)
 
 # Usage
 A web app using this module for persistence is being built at https://github.com/actuarial-sciences-for-africa-asa/BitemporalReactive.jl
