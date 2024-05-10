@@ -32,7 +32,8 @@ thus mutation of Business data consists of
 - updates of attributes of revisions
 
 # Documentation
-[here](https://actuarial-sciences-for-africa-asa.github.io/BitemporalPostgres.jl/dev/)
+[dev]africa-asa.github.io/BitemporalPostgres.jl/dev/)
+[stable]africa-asa.github.io/BitemporalPostgres.jl/stable/)
 
 # Usage
 A web app using this module for persistence is being built at https://github.com/actuarial-sciences-for-africa-asa/BitemporalReactive.jl
