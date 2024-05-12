@@ -25,9 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: julia-actions/setup-julia@v1
+      - uses: julia-actions/setup-julia@v2
         with:
-          version: '1'
+          version: '1.10'
       - run: |
           - run: |
           echo "Log level: ${{ github.event.inputs.logLevel }}"
