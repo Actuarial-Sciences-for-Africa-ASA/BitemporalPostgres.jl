@@ -1,6 +1,6 @@
 name: CI
 env:
-  JULIA_VERSION=$JULIA_BUGFIX_VERSION
+  JULIA_VERSION: $JULIA_BUGFIX_VERSION
 on:
   push:
     # Sequence of patterns matched against refs/heads
