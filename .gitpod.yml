@@ -1,7 +1,7 @@
 image:
   file: .gitpod.Dockerfile
 tasks:
-  - init: echo 'PATH_add ~/julia-1.8.2/bin' > /workspace/.envrc \
+  - init: echo 'PATH_add ~/julia-1.10.3/bin' > /workspace/.envrc \
      && echo 'export SEARCHLIGHT_USERNAME="gitpod"' >> /workspace/.envrc \
      && direnv allow /workspace
   - command: cd . && julia -e 'include("init.jl")'
