@@ -5,10 +5,6 @@ on:
     branches:  
       - main
       - 'releases/**'
-env:
-  # Setting an environment variable with the value of a configuration variable
-  JULIA_MINOR: ${{ vars.JULIA_MINOR_VERSION }}
-  
 jobs:
 
   runner-job:
@@ -38,6 +34,6 @@ jobs:
       - name: "Set up Julia"
         uses: julia-actions/setup-julia@v2
         with:
-          version: $JULIA_MINOR
+          version: ${{ vars.JULIA_MINOR_VERSION }}
       - run: GENIE_ENV="test" SEARCHLIGHT_PASSWORD="postgres" SEARCHLIGHT_USERNAME="postgres" julia --project=$(pwd) workflowtest.jl
         shell: bash
