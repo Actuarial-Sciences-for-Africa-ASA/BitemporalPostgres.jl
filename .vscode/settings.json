@@ -14,6 +14,7 @@
     "terminal.integrated.commandsToSkipShell": [
         "language-julia.interrupt"
     ],
+    "terminal.integrated.scrollback": 50000,
     "julia.executablePath": "~/julia-1.8.2/bin/julia",
     "julia.symbolCacheDownload": true,
     "julia.enableTelemetry": true,
