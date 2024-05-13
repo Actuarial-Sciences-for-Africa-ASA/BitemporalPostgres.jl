@@ -1,8 +1,9 @@
 image:
   file: .gitpod.Dockerfile
 tasks:
-  - init: cd ~ && mkdir julia && wget https://storage.googleapis.com/julialang2/bin/linux/x64/$JULIA_MINOR_VERSION/julia-$JULIA_BUGFIX_VERSION-linux-x86_64.tar.gz | tar -xvzf -C julia \
-     && echo 'PATH_add ~/julia/bin' > /workspace/.envrc \
+  - init: cd ~ && wget https://storage.googleapis.com/julialang2/bin/linux/x64/$JULIA_MINOR_VERSION/julia-$JULIA_BUGFIX_VERSION-linux-x86_64.tar.gz \
+     && tar -xvzf ~/julia-$JULIA_BUGFIX_VERSION-linux-x86_64.tar.gz \
+     && echo 'PATH_add ~/julia-$JULIA_BUGFIX_VERSION/bin' > /workspace/.envrc \
      && echo 'export SEARCHLIGHT_USERNAME="gitpod"' >> /workspace/.envrc \
      && direnv allow /workspace
   - command: cd . && julia -e 'include("init.jl")'
