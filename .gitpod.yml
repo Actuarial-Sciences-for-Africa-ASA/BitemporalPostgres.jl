@@ -1,7 +1,9 @@
 image:
   file: .gitpod.Dockerfile
 tasks:
-  - init: cd ~ && curl -L https://storage.googleapis.com/julialang2/bin/linux/x64/$JULIA_MINOR_VERSION/julia-$JULIA_BUGFIX_VERSION-linux-x86_64.tar.gz  | tar -C ~ -xzf - \
+  - init: cd ~ && echo $JULIA_BUGFIX_VERSION > bubu.txt \
+     && curl -L https://storage.googleapis.com/julialang2/bin/linux/x64/$JULIA_MINOR_VERSION/julia-$JULIA_BUGFIX_VERSION-linux-x86_64.tar.gz  -o julia.tgz \
+     && tar -xzf julia.tgz  && rm julia.tgz \
      && echo "PATH_add ~/julia-$JULIA_BUGFIX_VERSION/bin" > /workspace/.envrc \
      && echo 'export SEARCHLIGHT_USERNAME="gitpod"' >> /workspace/.envrc \
      && direnv allow /workspace
