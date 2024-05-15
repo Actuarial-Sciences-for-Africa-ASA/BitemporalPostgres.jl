@@ -35,6 +35,10 @@ thus mutation of Business data consists of
 [dev](https://actuarial-sciences-for-africa-asa.github.io/BitemporalPostgres.jl/dev/)
 [stable](https://actuarial-sciences-for-africa-asa.github.io/BitemporalPostgres.jl/stable/)
 
+To generate documentation in the development environment
+- [exec makedocs.jl in Julia REPL](makedocs.jl)
+- View generated docs using the link for 8080 under the ports tab 
+
 # Usage
 A web app using this module for persistence is being built at https://github.com/actuarial-sciences-for-africa-asa/BitemporalReactive.jl
 
