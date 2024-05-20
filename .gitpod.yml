@@ -8,6 +8,6 @@ tasks:
       && echo 'export SEARCHLIGHT_USERNAME="gitpod"' > /workspace/.envrc 
       && direnv allow /workspace
   - command: python3 -m http.server 8080 -d docs/build
-  - command: julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate();include("testCreateContract.jl"); include("testPendingMutations.jl")'
+  - command: julia -e 'using Pkg; Pkg.activate("."); Pkg.instantiate();include("workflowtest.jl")'
   - command: julia -e 'include("init.jl")'
   - command: gp open bitemporal_testcase.ipynb
