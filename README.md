@@ -40,21 +40,20 @@ To generate documentation in the development environment
 - View generated docs using the link for 8080 under the ports tab 
 
 # Usage
-A web app using this module for persistence is being built at https://github.com/actuarial-sciences-for-africa-asa/BitemporalReactive.jl
-
-
-## This project is a [Julia](https://julialang.org/) template configured for ephemeral development environments on [Gitpod](https://www.gitpod.io/). 
-If You start this repo in [gitpod](https://www.gitpod.io/docs/), You can open [this jupyter notebook](./bitemporal_testcase.ipynb) in vscode and execute the included code snippets with julia and postgres up and running.
+A web app using this module for persistence is being built at https://github.com/Actuarial-Sciences-for-Africa-ASA/GenieBuiltLifeProto.jl
 
 ## Next Steps
 
 Click the button below to start a new development environment:
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/gitpod-io/template-julia)
+The gitpod workspace uses a Docker a public image: [michaelfliegner/gitpodpgijulia](https://hub.docker.com/repository/docker/michaelfliegner/gitpodpgijulia/general)
+
+[The Dockerfile for this image resides here](https://github.com/Actuarial-Sciences-for-Africa-ASA/gitpod-pg-ijulia-Dockerfile)
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/?autostart=true#https://github.com/Actuarial-Sciences-for-Africa-ASA/BitemporalPostgres.jl) [On startup vscode will open this jupyter notebook:](bitemporal_testcase.ipynb)
 
 ## Get Started With Your Own Project
 
 ### A new project
 
-Click the above "Open in Gitpod" button to start a new workspace. Once you're ready to push your first code changes, Gitpod will guide you to fork this project 
-so you own it.
+Click the above "Open in Gitpod" button to start a new workspace. Once you're ready to push your first code changes, Gitpod will guide you to fork this project so you own it.
