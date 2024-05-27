@@ -27,17 +27,6 @@
     "gitlens.advanced.messages": {
         "suppressCommitHasNoPreviousCommitWarning": true
     },
-    "sqltools.connections": [
-        {
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 5432,
-            "driver": "PostgreSQL",
-            "username": "gitpod",
-            "name": "gitpod",
-            "database": "postgres"
-        }
-    ],
     "julia.NumThreads": 0,
     "workbench.editor.empty.hint": "hidden"
 }
