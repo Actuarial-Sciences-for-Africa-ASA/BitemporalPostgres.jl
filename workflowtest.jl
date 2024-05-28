@@ -10,7 +10,6 @@
 include("init.jl")
 using Logging, SearchLight
 using SearchLightPostgreSQL
-# run(`psql -f sqlsnippets/droptables.sql`)
 SearchLight.connect(SearchLight.Configuration.load())
 setfield!(SearchLight.config, :log_queries, false)
 setfield!(SearchLight.config, :log_level, Logging.Error)

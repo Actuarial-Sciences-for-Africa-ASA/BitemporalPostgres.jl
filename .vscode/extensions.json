@@ -1,7 +1,5 @@
 {
     "recommendations": [
-        "mtxr.sqltools-driver-pg",
-        "mtxr.sqltools",
         "julialang.language-julia"
     ]
 }
