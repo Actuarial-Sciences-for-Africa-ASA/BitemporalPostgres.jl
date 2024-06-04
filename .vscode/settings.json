@@ -39,6 +39,16 @@
             "database": "postgres",
             "username": "postgres",
             "password": ""
-        }
+        },
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "gitpod",
+            "database": "gitpod",
+            "username": "gitpod",
+            "password": "gitpod"
+        }        
     ]
 }
