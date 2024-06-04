@@ -9,3 +9,5 @@ ENV["GENIE_DEV"] = "dev"
 ENV["SEARCHLIGHT_USERNAME"] = "postgres"
 ENV["SEARCHLIGHT_PASSWORD"] = "postgres"
 EOF
+
+pg_ctl start
