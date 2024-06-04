@@ -44,6 +44,8 @@ A web app using this module for persistence is being built at https://github.com
 
 ## Next Steps
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?template=michaelfliegner&skip_quickstart=true&machine=basicLinux32gb&repo=460960355&ref=main&devcontainer_path=.devcontainer%2Fdevcontainer.json)
+
 Click the button below to start a new development environment:
 
 The gitpod workspace uses a Docker a public image: [michaelfliegner/gitpodpgijulia](https://hub.docker.com/repository/docker/michaelfliegner/gitpodpgijulia/general)
@@ -57,3 +59,4 @@ The gitpod workspace uses a Docker a public image: [michaelfliegner/gitpodpgijul
 ### A new project
 
 Click the above "Open in Gitpod" button to start a new workspace. Once you're ready to push your first code changes, Gitpod will guide you to fork this project so you own it.
+
